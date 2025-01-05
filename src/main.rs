@@ -1,8 +1,8 @@
 use base64::prelude::*;
-use did_key::{self, CoreSign, Fingerprint, PatchedKeyPair, Secp256k1KeyPair};
+use did_key::{self, CoreSign, Fingerprint, KeyMaterial, PatchedKeyPair, Secp256k1KeyPair};
 use serde::{Deserialize, Serialize, Serializer};
 use sha2::Digest;
-use std::{collections::HashMap, fmt::Pointer, iter};
+use std::{collections::HashMap, fmt::Pointer, fs::File, io::Write, iter, path::PathBuf};
 use url::Url;
 
 fn main() {
@@ -63,7 +63,59 @@ fn main() {
         signed_op_hash.as_slice(),
     )[..24];
 
-    println!("did:plc:{}", plc_hash)
+    println!("did:plc:{}", plc_hash);
+
+    // Store generated keys
+    let file_name = format!(
+        "./did_plc_creds_{}.secret",
+        chrono::Utc::now().format("%Y-%m-%d_%H-%M-%S")
+    );
+    write_results(
+        &signing_key,
+        &rotation_keys,
+        &signed_op,
+        plc_hash,
+        file_name.as_str(),
+    );
+    println!("Saved credentials to {file_name}");
+}
+
+fn write_results(
+    signing_key: &PatchedKeyPair,
+    rotation_keys: &[PatchedKeyPair],
+    plc_op: &SignedPlcOperation,
+    plc_hash: &str,
+    file_name: &str,
+) {
+    let file_path = PathBuf::from(file_name);
+
+    let file = File::options()
+        .write(true)
+        .create_new(true)
+        .open(file_path.clone());
+    let file = match file {
+        Ok(file) => file,
+        Err(err) => panic!("Could not write results to {}: {err}", file_path.display()),
+    };
+
+    #[derive(Serialize)]
+    struct Output<'a> {
+        signing_key_priv_bytes_base64: String,
+        rotation_keys_priv_bytes_base64: Vec<String>,
+        plc_op: &'a SignedPlcOperation,
+        plc_hash: &'a str,
+    }
+    let output = Output {
+        signing_key_priv_bytes_base64: BASE64_STANDARD.encode(signing_key.private_key_bytes()),
+        rotation_keys_priv_bytes_base64: rotation_keys
+            .iter()
+            .map(|k| BASE64_STANDARD.encode(k.private_key_bytes()))
+            .collect(),
+        plc_op,
+        plc_hash,
+    };
+
+    serde_json::ser::to_writer_pretty(file, &output).expect("Failed to serialize results");
 }
 
 fn format_did_key(did_key: &PatchedKeyPair) -> DidKey {

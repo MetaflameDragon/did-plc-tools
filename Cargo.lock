@@ -353,6 +353,7 @@ dependencies = [
  "k256",
  "serde",
  "serde_ipld_dagcbor",
+ "serde_json",
  "url",
 ]
 

@@ -2,7 +2,7 @@ use did_key::{
     self, Config, DIDCore, Fingerprint, KeyMaterial, P256KeyPair, PatchedKeyPair, Secp256k1KeyPair,
     CONFIG_LD_PUBLIC,
 };
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use std::{collections::HashMap, fmt::Pointer, iter};
 use url::Url;
 
@@ -12,7 +12,7 @@ fn main() {
 
     let seed = None;
     let signing_key = did_key::generate::<Secp256k1KeyPair>(seed);
-    let rotation_keys = iter::from_fn(|| Some(did_key::generate::<Secp256k1KeyPair>(seed)))
+    let rotation_keys: Vec<_> = iter::from_fn(|| Some(did_key::generate::<Secp256k1KeyPair>(seed)))
         .take(2)
         .collect();
 
@@ -35,6 +35,9 @@ fn main() {
     };
 
     dbg!(&unsigned_op);
+
+    // Serialization test - JSON should look the same as in the docs/examples
+    //println!("{}", serde_json::ser::to_string_pretty(&unsigned_op).unwrap());
 }
 
 fn format_did_key(did_key: &PatchedKeyPair) -> DidKey {
@@ -68,16 +71,24 @@ struct PlcOperation {
 struct UnsignedPlcOperation {
     // Fixed value "plc_operation"
     r#type: String,
+
     // Array of up to 5 rotation keys
+    #[serde(rename = "rotationKeys")]
     rotation_keys: Vec<DidKey>,
+
     // Key-value map of verification methods (e.g. "atproto" & signing key)
+    #[serde(rename = "verificationMethods")]
     verification_methods: HashMap<String, DidKey>,
+
     // Array of at:// handles
+    #[serde(rename = "alsoKnownAs")]
     also_known_as: Vec<AkaUri>,
+
     // Key-value map of services, services must have a type and endpoint.
     // Endpoint must be a valid http(s)-prefixed url
     // Key is currently just "atproto_pds" for type "AtprotoPersonalDataServer"
     services: HashMap<String, PlcService>,
+
     // CID Hash reference to previous operation, null (None) for genesis operations
     prev: Option<PlcOperationRef>,
 }

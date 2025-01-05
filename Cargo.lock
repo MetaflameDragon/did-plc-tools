@@ -42,10 +42,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4c7f02d4ea65f2c1853089ffd8d2787bdbc63de2f0d29dedbcf8ccdfa0ccd4cf"
 
 [[package]]
+name = "base32"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "022dfe9eb35f19ebbcb51e0b40a5ab759f46ad60cadf7297e0bd085afb50e076"
+
+[[package]]
 name = "base64"
 version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e1b586273c5702936fe7b7d6896644d8be71e6314cfe09d3167c95f712589e8"
+
+[[package]]
+name = "base64"
+version = "0.22.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
 name = "base64ct"
@@ -239,7 +251,9 @@ version = "0.2.0-rc.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b0b8ce8218c97789f16356e7896b3714f26c2ee1079b79c0b7ae7064bb9089fa"
 dependencies = [
+ "getrandom 0.2.15",
  "hybrid-array",
+ "rand_core 0.6.4",
 ]
 
 [[package]]
@@ -328,7 +342,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ed21f9ed50f9d3f79b6ba84f2cf8a536399c3500bc99406c1bbc1e0c598524e"
 dependencies = [
  "arrayref",
- "base64",
+ "base64 0.13.1",
  "bls12_381_plus",
  "bs58",
  "curve25519-dalek",
@@ -349,11 +363,14 @@ dependencies = [
 name = "did-plc"
 version = "0.1.0"
 dependencies = [
+ "base32",
+ "base64 0.22.1",
  "did-key",
  "k256",
  "serde",
  "serde_ipld_dagcbor",
  "serde_json",
+ "sha2 0.11.0-pre.4",
  "url",
 ]
 
@@ -894,7 +911,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95b09eff1b35ed3b33b877ced3a691fc7a481919c7e29c53c906226fcf55e2a1"
 dependencies = [
  "arrayref",
- "base64",
+ "base64 0.13.1",
  "digest 0.9.0",
  "hmac-drbg",
  "libsecp256k1-core",

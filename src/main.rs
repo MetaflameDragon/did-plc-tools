@@ -1,8 +1,7 @@
-use did_key::{
-    self, Config, DIDCore, Fingerprint, KeyMaterial, P256KeyPair, PatchedKeyPair, Secp256k1KeyPair,
-    CONFIG_LD_PUBLIC,
-};
+use base64::prelude::*;
+use did_key::{self, CoreSign, Fingerprint, PatchedKeyPair, Secp256k1KeyPair};
 use serde::{Deserialize, Serialize, Serializer};
+use sha2::Digest;
 use std::{collections::HashMap, fmt::Pointer, iter};
 use url::Url;
 
@@ -38,6 +37,33 @@ fn main() {
 
     // Serialization test - JSON should look the same as in the docs/examples
     //println!("{}", serde_json::ser::to_string_pretty(&unsigned_op).unwrap());
+
+    let unsigned_op_serialized = serde_ipld_dagcbor::ser::to_vec(&unsigned_op)
+        .expect("Unsigned operation serialization failed");
+    let signature = rotation_keys
+        .first()
+        .expect("Expected at least one rotation key")
+        .sign(unsigned_op_serialized.as_slice());
+    let signature_base64url = BASE64_URL_SAFE.encode(signature.as_slice());
+
+    let signed_op = SignedPlcOperation {
+        inner: unsigned_op,
+        sig: Signature(signature_base64url),
+    };
+
+    let signed_op_serialized =
+        serde_ipld_dagcbor::ser::to_vec(&signed_op).expect("Signed operation serialization failed");
+
+    let signed_op_hash = sha2::Sha256::digest(&signed_op_serialized);
+
+    println!("{}", serde_json::ser::to_string_pretty(&signed_op).unwrap());
+
+    let plc_hash = &base32::encode(
+        base32::Alphabet::Rfc4648Lower { padding: false },
+        signed_op_hash.as_slice(),
+    )[..24];
+
+    println!("did:plc:{}", plc_hash)
 }
 
 fn format_did_key(did_key: &PatchedKeyPair) -> DidKey {
@@ -62,7 +88,8 @@ struct PlcService {
 struct PlcOperationRef(String);
 
 #[derive(Debug, Serialize, Deserialize)]
-struct PlcOperation {
+struct SignedPlcOperation {
+    #[serde(flatten)]
     inner: UnsignedPlcOperation,
     sig: Signature,
 }

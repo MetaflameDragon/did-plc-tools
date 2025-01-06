@@ -27,6 +27,8 @@ env_logger = "0.11.6"
 log = "0.4.22"
 anyhow = "1.0.95"
 thiserror = "2.0.9"
+derive_more = { version = "1.0.0", features = ["from", "display", "default"] }
+derive-new = "0.7.0"
 
 [dependencies]
 serde = { workspace = true }

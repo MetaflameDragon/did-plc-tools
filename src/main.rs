@@ -50,7 +50,7 @@ fn main() {
         &rotation_keys,
         &signed_op,
         did_plc.plc_hash(),
-        file_name.as_str(),
+        &file_name,
     );
     println!("Saved credentials to {file_name}");
 }

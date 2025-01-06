@@ -14,3 +14,7 @@ base64 = { workspace = true }
 chrono = { workspace = true }
 egui = { workspace = true }
 eframe = { workspace = true }
+env_logger = { workspace = true }
+log = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }

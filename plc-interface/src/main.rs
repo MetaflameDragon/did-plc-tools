@@ -1,4 +1,5 @@
 #![feature(never_type)]
+#![feature(trait_alias)]
 
 mod app;
 

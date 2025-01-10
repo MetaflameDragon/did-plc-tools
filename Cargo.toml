@@ -11,33 +11,31 @@ members = [
 
 [workspace.dependencies]
 did-plc = { path = "did-plc" }
+
 serde = "1.0"
-serde_ipld_dagcbor = "0.6"
-k256 = "0.14.0-pre.2"
-url = "2.5.4"
-did-key = "0.2.1"
 serde_json = "1.0.134"
-base64 = "0.22.1"
-base32 = "0.5.1"
+serde_ipld_dagcbor = "0.6"
+
 sha2 = "0.11.0-pre.4"
+k256 = "0.13"
+p256 = "0.13"
+secp256k1 = { version = "0.30.0", features = ["global-context", "serde"] }
+
+multibase = "0.9.1"
+base32 = "0.5.1"
+base64 = "0.22.1"
+url = "2.5.4"
+
 chrono = "0.4.39"
-egui = "0.30.0"
-eframe = "0.30.0"
-env_logger = "0.11.6"
-log = "0.4.22"
+reqwest = "0.12.12"
+
 anyhow = "1.0.95"
 thiserror = "2.0.9"
-derive_more = { version = "1.0.0", features = ["from", "display", "default"] }
 derive-new = "0.7.0"
+derive_more = { version = "1.0.0", features = ["from", "display", "default"] }
 
-[dependencies]
-serde = { workspace = true }
-serde_ipld_dagcbor = { workspace = true }
-k256 = { workspace = true }
-url = { workspace = true }
-did-key = { workspace = true }
-serde_json = { workspace = true }
-base64 = { workspace = true }
-base32 = { workspace = true }
-sha2 = { workspace = true }
-chrono = { workspace = true }
+egui = "0.30.0"
+eframe = "0.30.0"
+
+log = "0.4.22"
+env_logger = "0.11.6"

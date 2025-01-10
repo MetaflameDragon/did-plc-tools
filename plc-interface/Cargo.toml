@@ -5,18 +5,27 @@ edition = "2021"
 
 [dependencies]
 did-plc = { workspace = true }
-url = { workspace = true }
-did-key = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-serde_ipld_dagcbor = { workspace = true }
-base64 = { workspace = true }
-chrono = { workspace = true }
 egui = { workspace = true }
 eframe = { workspace = true }
+
 env_logger = { workspace = true }
 log = { workspace = true }
 anyhow = { workspace = true }
+derive-new = { workspace = true }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_ipld_dagcbor = { workspace = true }
+
+sha2 = { workspace = true }
+p256 = { workspace = true }
+secp256k1 = { workspace = true }
+
+multibase = { workspace = true }
+base64 = { workspace = true }
+base32 = { workspace = true }
+url = { workspace = true }
+
+chrono = { workspace = true }
 thiserror = { workspace = true }
 derive_more = { workspace = true }
-derive-new = { workspace = true }

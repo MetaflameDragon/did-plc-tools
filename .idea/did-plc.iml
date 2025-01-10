@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/plc-interface/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/did-key/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/did-plc/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/plc-interface/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />

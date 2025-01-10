@@ -1001,6 +1001,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "did-key"
+version = "0.1.0"
+dependencies = [
+ "base32",
+ "base64",
+ "chrono",
+ "derive_more",
+ "multibase",
+ "p256",
+ "secp256k1",
+ "serde",
+ "serde_ipld_dagcbor",
+ "serde_json",
+ "sha2 0.11.0-pre.4",
+ "thiserror 2.0.9",
+ "url",
+]
+
+[[package]]
 name = "did-plc"
 version = "0.1.0"
 dependencies = [

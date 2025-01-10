@@ -28,6 +28,8 @@ url = "2.5.4"
 
 chrono = "0.4.39"
 reqwest = "0.12.12"
+itertools = "0.14.0"
+rand = "^0.8"
 
 anyhow = "1.0.95"
 thiserror = "2.0.9"

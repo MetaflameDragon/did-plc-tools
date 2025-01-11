@@ -1,12 +1,11 @@
 use base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine};
-use did_key::{KeyMaterial, PatchedKeyPair};
 use did_plc::SignedPlcOperation;
 use serde::Serialize;
 use std::{fs::File, path::PathBuf};
 
 pub fn write_results(
-    signing_key: &PatchedKeyPair,
-    rotation_keys: &[PatchedKeyPair],
+    signing_key_priv: &secp256k1::SecretKey,
+    rotation_keys_priv: &[secp256k1::SecretKey],
     plc_op: &SignedPlcOperation,
     plc_hash: &str,
     file_name: &str,
@@ -30,10 +29,10 @@ pub fn write_results(
         plc_hash: &'a str,
     }
     let output = Output {
-        signing_key_priv_bytes_base64: BASE64_STANDARD.encode(signing_key.private_key_bytes()),
-        rotation_keys_priv_bytes_base64: rotation_keys
+        signing_key_priv_bytes_base64: BASE64_STANDARD.encode(signing_key_priv.secret_bytes()),
+        rotation_keys_priv_bytes_base64: rotation_keys_priv
             .iter()
-            .map(|k| BASE64_STANDARD.encode(k.private_key_bytes()))
+            .map(|k| BASE64_STANDARD.encode(k.secret_bytes()))
             .collect(),
         plc_op,
         plc_hash,

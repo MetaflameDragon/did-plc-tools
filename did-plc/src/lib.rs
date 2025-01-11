@@ -1,17 +1,9 @@
-use base64::{prelude::BASE64_URL_SAFE, Engine};
-use did_key::{CoreSign, Fingerprint, PatchedKeyPair};
+use base64::prelude::*;
+use did_key::DidKey;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
-use std::collections::HashMap;
-use std::fmt::Display;
+use std::{collections::HashMap, fmt::Display};
 use url::Url;
-
-pub fn format_did_key(did_key: &PatchedKeyPair) -> DidKey {
-    DidKey(format!("did:key:{}", did_key.fingerprint()))
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct DidKey(String);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Signature(String);
@@ -52,16 +44,17 @@ pub struct SignedPlcOperation {
 }
 
 impl SignedPlcOperation {
-    pub fn new(unsigned_op: UnsignedPlcOperation, signing_key: &PatchedKeyPair) -> Self {
+    pub fn new(unsigned_op: UnsignedPlcOperation, signing_key: &secp256k1::SecretKey) -> Self {
         let unsigned_op_serialized = serde_ipld_dagcbor::ser::to_vec(&unsigned_op)
             .expect("Unsigned operation serialization failed");
-        let signature = signing_key.sign(unsigned_op_serialized.as_slice());
-        let signature_base64url = BASE64_URL_SAFE.encode(signature.as_slice());
+        // let signature = signing_key.sign(unsigned_op_serialized.as_slice());
+        // let signature_base64url = BASE64_URL_SAFE.encode(signature.as_slice());
 
-        SignedPlcOperation {
-            inner: unsigned_op,
-            sig: Signature(signature_base64url),
-        }
+        todo!()
+        // SignedPlcOperation {
+        //     inner: unsigned_op,
+        //     sig: Signature(signature_base64url),
+        // }
     }
 }
 

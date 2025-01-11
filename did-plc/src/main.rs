@@ -1,5 +1,5 @@
 use base64::prelude::*;
-use did_key::{self, CoreSign, KeyMaterial, Secp256k1KeyPair};
+use did_key::{self, DidKey};
 use did_plc::{AkaUri, DidPlc, PlcService, SignedPlcOperation, UnsignedPlcOperation};
 use serde::{Serialize, Serializer};
 use sha2::Digest;
@@ -12,15 +12,23 @@ fn main() {
     let handle = "scalytooth.metaflame.dev";
     let endpoint = Url::parse("https://scalytooth.metaflame.dev").expect("invalid endpoint URL");
 
-    let seed = None;
-    let signing_key = did_key::generate::<Secp256k1KeyPair>(seed);
-    let rotation_keys: Vec<_> = iter::from_fn(|| Some(did_key::generate::<Secp256k1KeyPair>(seed)))
+    let mut rng = secp256k1::rand::rngs::OsRng;
+
+    let (signing_key_priv, signing_key_pub) = secp256k1::generate_keypair(&mut rng);
+    let rotation_keys: Vec<_> = iter::from_fn(|| Some(secp256k1::generate_keypair(&mut rng)))
         .take(2)
         .collect();
 
     let unsigned_op = UnsignedPlcOperation::new_genesis(
-        rotation_keys.iter().map(did_plc::format_did_key).collect(),
-        HashMap::from([("atproto".to_string(), did_plc::format_did_key(&signing_key))]),
+        rotation_keys
+            .iter()
+            .map(|pair| pair.1)
+            .map(DidKey::from_public_key)
+            .collect(),
+        HashMap::from([(
+            "atproto".to_string(),
+            DidKey::from_public_key(signing_key_pub),
+        )]),
         vec![AkaUri::new_at(handle)],
         HashMap::from([("atproto_pds".to_string(), PlcService::new_at_pds(&endpoint))]),
     );
@@ -30,10 +38,10 @@ fn main() {
     // Serialization test - JSON should look the same as in the docs/examples
     //println!("{}", serde_json::ser::to_string_pretty(&unsigned_op).unwrap());
 
-    let signing_key = rotation_keys
+    let operation_signing_key = rotation_keys
         .first()
         .expect("Expected at least one rotation key");
-    let signed_op = SignedPlcOperation::new(unsigned_op, signing_key);
+    let signed_op = SignedPlcOperation::new(unsigned_op, &operation_signing_key.0);
 
     // println!("{}", serde_json::ser::to_string_pretty(&signed_op).unwrap());
 
@@ -46,8 +54,8 @@ fn main() {
         chrono::Utc::now().format("%Y-%m-%d_%H-%M-%S")
     );
     helpers::write_results(
-        &signing_key,
-        &rotation_keys,
+        &signing_key_priv,
+        &rotation_keys.iter().map(|pair| pair.0).collect::<Vec<_>>(),
         &signed_op,
         did_plc.plc_hash(),
         &file_name,

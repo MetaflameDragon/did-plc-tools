@@ -2,14 +2,15 @@ use derive_more::Into;
 use multibase::Base;
 use p256::PublicKey as P256PublicKey;
 use secp256k1::PublicKey as Secp256k1PublicKey;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::io::Read;
 
 /// A String newtype representing public key bytes in the did:key:<mb-value>
 /// format.
-#[derive(Into)]
+#[derive(Into, Serialize, Deserialize, Debug)]
 pub struct DidKey {
     #[into]
+    #[serde(flatten)]
     formatted_value: String,
 }
 

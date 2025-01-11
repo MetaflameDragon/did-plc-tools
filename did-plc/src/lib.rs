@@ -1,5 +1,6 @@
 use base64::prelude::*;
 use did_key::DidKey;
+use secp256k1::Message;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use std::{collections::HashMap, fmt::Display};
@@ -47,14 +48,15 @@ impl SignedPlcOperation {
     pub fn new(unsigned_op: UnsignedPlcOperation, signing_key: &secp256k1::SecretKey) -> Self {
         let unsigned_op_serialized = serde_ipld_dagcbor::ser::to_vec(&unsigned_op)
             .expect("Unsigned operation serialization failed");
-        // let signature = signing_key.sign(unsigned_op_serialized.as_slice());
-        // let signature_base64url = BASE64_URL_SAFE.encode(signature.as_slice());
+        let message =
+            Message::from_digest(sha2::Sha256::digest(unsigned_op_serialized.as_slice()).0);
+        let signature = signing_key.sign_ecdsa(message);
+        let signature_base64url = BASE64_URL_SAFE.encode(signature.serialize_compact());
 
-        todo!()
-        // SignedPlcOperation {
-        //     inner: unsigned_op,
-        //     sig: Signature(signature_base64url),
-        // }
+        SignedPlcOperation {
+            inner: unsigned_op,
+            sig: Signature(signature_base64url),
+        }
     }
 }
 

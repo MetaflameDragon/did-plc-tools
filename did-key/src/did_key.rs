@@ -1,14 +1,14 @@
+use crate::key_algo::SupportedKeyAlgo;
 use derive_more::Into;
 use multibase::Base;
-use serde::{Deserialize, Serialize};
-use crate::key_algo::{SupportedKeyAlgo};
+use serde::Serialize;
 
 /// A String newtype representing public key bytes in the did:key:<mb-value>
 /// format.
-#[derive(Into, Serialize, Deserialize, Debug)]
+#[derive(Into, Serialize, Clone, Debug)] // TODO Deserialize
+#[serde(into = "String")]
 pub struct DidKey {
     #[into]
-    #[serde(flatten)]
     formatted_value: String,
 }
 
@@ -36,16 +36,31 @@ mod tests {
     use crate::did_key::DidKey;
     use rand::rngs::mock::StepRng;
 
-    #[test]
-    fn encode_key() {
+    fn gen_did_key() -> DidKey {
         let mut rng = StepRng::new(2, 1);
         let (_secret_key, public_key) = secp256k1::generate_keypair(&mut rng);
 
         let did_key = DidKey::from_public_key(public_key);
+        did_key
+    }
+
+    #[test]
+    fn encode_key() {
+        let did_key = gen_did_key();
 
         assert_eq!(
             did_key.formatted_value(),
             "did:key:z6DuCMU2vmvYpdavvpDwStgrKHsf6h8fiAoLRGkntD8jj37W"
+        );
+    }
+
+    #[test]
+    fn serialize_key() {
+        let did_key = gen_did_key();
+
+        assert_eq!(
+            serde_json::to_string_pretty(&did_key).unwrap(),
+            r#""did:key:z6DuCMU2vmvYpdavvpDwStgrKHsf6h8fiAoLRGkntD8jj37W""#
         );
     }
 }

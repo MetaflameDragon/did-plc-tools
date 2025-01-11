@@ -1,10 +1,8 @@
+use base64::{engine::general_purpose::STANDARD as BASE64_STANDARD, Engine};
 use did_key::{KeyMaterial, PatchedKeyPair};
 use did_plc::SignedPlcOperation;
-use std::path::PathBuf;
-use std::fs::File;
 use serde::Serialize;
-use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
-use base64::Engine;
+use std::{fs::File, path::PathBuf};
 
 pub fn write_results(
     signing_key: &PatchedKeyPair,

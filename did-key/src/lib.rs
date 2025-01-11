@@ -58,6 +58,12 @@ impl SupportedKeyAlgo for Secp256k1PublicKey {
     }
 }
 
+impl SupportedKeyAlgo for P256PublicKey {
+    fn pub_key_bytes(&self) -> Box<[u8]> {
+        Box::new(todo!())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

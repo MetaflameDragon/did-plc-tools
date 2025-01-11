@@ -1,11 +1,11 @@
 use crate::key_algo::SupportedKeyAlgo;
 use derive_more::Into;
 use multibase::Base;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// A String newtype representing public key bytes in the did:key:<mb-value>
 /// format.
-#[derive(Into, Serialize, Clone, Debug)] // TODO Deserialize
+#[derive(Into, Serialize, Deserialize, Clone, Debug)] // TODO Fix deserialize
 #[serde(into = "String")]
 pub struct DidKey {
     #[into]

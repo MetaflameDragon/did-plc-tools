@@ -72,7 +72,7 @@ mod tests {
 
         assert_eq!(
             did_key.formatted_value(),
-            "did:key:z61QAFNa5KZ9vJsJStq3yTWSPZESoPd8yYP1eiy52nwXgut"
+            "did:key:z6DuCMU2vmvYpdavvpDwStgrKHsf6h8fiAoLRGkntD8jj37W"
         );
     }
 }

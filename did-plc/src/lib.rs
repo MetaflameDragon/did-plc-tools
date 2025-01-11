@@ -130,7 +130,7 @@ impl DidPlc {
     }
 
     pub fn to_did_str(&self) -> String {
-        format!("did:key:{}", self.plc_hash)
+        format!("did:plc:{}", self.plc_hash)
     }
 }
 

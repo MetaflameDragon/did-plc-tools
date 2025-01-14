@@ -72,7 +72,7 @@ struct SigningKeyContainer(
 impl AppSection for SigningKeyContainer {
     fn draw_and_update(&mut self, ui: &mut Ui) {
         ui.horizontal(|ui| {
-            if let Some(ref mut key) = self.0 {
+            if let Some(ref mut key) = **self {
                 if ui.button("X").clicked() {
                     **self = None;
                 } else {

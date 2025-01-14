@@ -13,7 +13,7 @@ pub struct DidKey {
 }
 
 impl DidKey {
-    pub fn from_public_key<K: SupportedKeyAlgo>(public_key: K) -> DidKey {
+    pub fn from_public_key<K: SupportedKeyAlgo>(public_key: &K) -> DidKey {
         let mb_value = multibase::encode(
             Base::Base58Btc,
             itertools::chain(K::multicodec_bytes(), public_key.pub_key_bytes().iter())
@@ -46,7 +46,7 @@ mod tests {
         let mut rng = StepRng::new(2, 1);
         let (_secret_key, public_key) = secp256k1::generate_keypair(&mut rng);
 
-        let did_key = DidKey::from_public_key(public_key);
+        let did_key = DidKey::from_public_key(&public_key);
         did_key
     }
 

@@ -26,7 +26,7 @@ fn main() {
             .collect(),
         HashMap::from([(
             "atproto".to_string(),
-            DidKey::from_public_key(signing_key_pub),
+            DidKey::from_public_key(&signing_key_pub),
         )]),
         vec![AkaUri::new_at(handle)],
         HashMap::from([("atproto_pds".to_string(), PlcService::new_at_pds(&endpoint))]),

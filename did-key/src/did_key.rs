@@ -31,8 +31,8 @@ impl DidKey {
     }
 }
 
-impl<T: SupportedKeyAlgo> From<T> for DidKey {
-    fn from(value: T) -> Self {
+impl<T: SupportedKeyAlgo> From<&T> for DidKey {
+    fn from(value: &T) -> Self {
         Self::from_public_key(value)
     }
 }

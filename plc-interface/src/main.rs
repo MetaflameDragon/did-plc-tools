@@ -3,6 +3,7 @@
 extern crate core;
 
 mod app;
+mod signing_key;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> eframe::Result {

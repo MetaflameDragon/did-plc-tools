@@ -6,19 +6,26 @@ use std::path::Path;
 
 #[derive(Default)]
 pub struct App {
-    did_key_generator: SignatureKeyGenerator,
+    did_key_generator: Vec<SignatureKeyGenerator>,
 }
 
 impl App {
     pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
-        Default::default()
+        App {
+            did_key_generator: vec![SignatureKeyGenerator::default(); 5],
+            ..Default::default()
+        }
     }
 }
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &Context, frame: &mut Frame) {
         egui::panel::CentralPanel::default().show(ctx, |ui| {
-            &self.did_key_generator.draw_and_update(ui);
+            ui.vertical(|ui| {
+                for gen in &mut self.did_key_generator {
+                    gen.draw_and_update(ui);
+                }
+            })
         });
     }
 }
@@ -27,7 +34,7 @@ pub trait AppSection {
     fn draw_and_update(&mut self, ui: &mut Ui); // TODO: return InnerResponse
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct SignatureKeyGenerator {
     signature_key: Option<SignatureKey>,
 }
@@ -47,8 +54,7 @@ impl AppSection for SignatureKeyGenerator {
             if let Some(key) = &self.signature_key {
                 if ui.button("X").clicked() {
                     self.signature_key = None;
-                }
-                else {
+                } else {
                     let key_str = format!("did:key:{}", key.as_did_key().formatted_value());
                     ui.label(RichText::new(key_str).monospace());
                 }
@@ -62,6 +68,7 @@ impl AppSection for SignatureKeyGenerator {
     }
 }
 
+#[derive(Clone)]
 enum SignatureKey {
     KeyPair {
         secret: secp256k1::SecretKey,

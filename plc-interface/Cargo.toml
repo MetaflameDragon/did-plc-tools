@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 did-plc = { workspace = true }
+did-key = { workspace = true }
 egui = { workspace = true }
 eframe = { workspace = true }
 

@@ -2703,6 +2703,7 @@ dependencies = [
  "chrono",
  "derive-new",
  "derive_more",
+ "did-key",
  "did-plc",
  "eframe",
  "egui",

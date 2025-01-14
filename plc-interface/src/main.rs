@@ -1,5 +1,6 @@
 #![feature(never_type)]
 #![feature(trait_alias)]
+extern crate core;
 
 mod app;
 

@@ -1,12 +1,12 @@
-use did_key::{DIDCore, Fingerprint, Generate, KeyPair, PatchedKeyPair, Secp256k1KeyPair, ECDH};
+use anyhow::Result;
+use did_key::DidKey;
 use eframe::Frame;
 use egui::{Color32, Context, RichText, Ui};
-
-trait KeyPairGenerator = Generate + ECDH + DIDCore + Fingerprint + Into<KeyPair>;
+use std::path::Path;
 
 #[derive(Default)]
 pub struct App {
-    did_key_generator: DidKeyGenerator,
+    did_key_generator: SignatureKeyGenerator,
 }
 
 impl App {
@@ -28,31 +28,42 @@ pub trait AppSection {
 }
 
 #[derive(Default)]
-struct DidKeyGenerator {
-    loaded_did_key: Option<PatchedKeyPair>,
+struct SignatureKeyGenerator {
+    signature_key: Option<SignatureKey>,
 }
 
-impl DidKeyGenerator {
-    fn generate_and_load_did_key(&mut self) {
-        self.loaded_did_key = Some(generate_new_did_key::<Secp256k1KeyPair>());
+impl SignatureKeyGenerator {
+    fn generate_and_load_keypair(&mut self) -> Result<()> {
+        self.signature_key = Some(generate_keypair()?);
+        Ok(())
     }
+
+    fn load_keypair_from_file(&mut self, path: &Path) {}
 }
 
-impl AppSection for DidKeyGenerator {
+impl AppSection for SignatureKeyGenerator {
     fn draw_and_update(&mut self, ui: &mut Ui) {
-        ui.vertical(|ui| {
+        ui.horizontal(|ui| {
+            if let Some(key) = &self.signature_key {
+                if ui.button("New").clicked() {
+                    self.generate_and_load_keypair();
+                }
+                if ui.button("Load").clicked() {}
+            } else {
+            }
+
             ui.heading("did:key generator");
 
             ui.horizontal(|ui| {
                 if ui.button("Generate new did:key").clicked() {
-                    self.generate_and_load_did_key();
+                    self.generate_and_load_keypair();
                 }
             });
 
             ui.horizontal(|ui| {
                 ui.label(RichText::new("Loaded key: ").strong());
-                if let Some(key) = &self.loaded_did_key {
-                    let key_str = format!("did:key:{}", key.fingerprint());
+                if let Some(key) = &self.signature_key {
+                    let key_str = format!("did:key:{}", key.as_did_key().formatted_value());
                     ui.label(RichText::new(key_str).monospace());
                 } else {
                     ui.label(RichText::new("None").italics().weak());
@@ -62,6 +73,26 @@ impl AppSection for DidKeyGenerator {
     }
 }
 
-fn generate_new_did_key<T: KeyPairGenerator>() -> PatchedKeyPair {
-    did_key::generate::<T>(None)
+enum SignatureKey {
+    KeyPair {
+        secret: secp256k1::SecretKey,
+        public: secp256k1::PublicKey,
+    },
+}
+
+impl SignatureKey {
+    pub fn as_did_key(&self) -> DidKey {
+        match self {
+            SignatureKey::KeyPair { public, .. } => public.into(),
+        }
+    }
+}
+
+fn generate_keypair() -> Result<SignatureKey> {
+    let (secret, public) = secp256k1::generate_keypair(&mut secp256k1::rand::rngs::OsRng);
+    Ok(SignatureKey::KeyPair { secret, public })
+}
+
+fn load_keypair(priv_bytes_path: &Path) -> Result<SignatureKey> {
+    Ok(todo!())
 }

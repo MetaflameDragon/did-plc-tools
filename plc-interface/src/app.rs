@@ -7,7 +7,7 @@ use std::path::Path;
 
 #[derive(Default)]
 pub struct App {
-    did_keys: Vec<SignatureKeyContainer>,
+    did_keys: Vec<SigningKeyContainer>,
 }
 
 impl App {
@@ -35,10 +35,10 @@ pub trait AppSection {
     fn draw_and_update(&mut self, ui: &mut Ui); // TODO: return InnerResponse
 }
 
-impl SignatureKey {
+impl SigningKey {
     fn generate_keypair() -> Result<Self> {
         let (secret, public) = secp256k1::generate_keypair(&mut secp256k1::rand::rngs::OsRng);
-        Ok(SignatureKey::KeyPair { secret, public })
+        Ok(SigningKey::KeyPair { secret, public })
     }
 
     fn load_keypair(priv_bytes_path: &Path) -> Result<Self> {
@@ -46,12 +46,12 @@ impl SignatureKey {
     }
     pub fn as_did_key(&self) -> DidKey {
         match self {
-            SignatureKey::KeyPair { public, .. } => public.into(),
+            SigningKey::KeyPair { public, .. } => public.into(),
         }
     }
 }
 
-impl AppSection for SignatureKey {
+impl AppSection for SigningKey {
     fn draw_and_update(&mut self, ui: &mut Ui) {
         ui.horizontal(|ui| {
             let key_str = format!("did:key:{}", self.as_did_key().formatted_value());
@@ -60,9 +60,9 @@ impl AppSection for SignatureKey {
     }
 }
 
-type SignatureKeyContainer = Option<SignatureKey>;
+type SigningKeyContainer = Option<SigningKey>;
 
-impl AppSection for SignatureKeyContainer {
+impl AppSection for SigningKeyContainer {
     fn draw_and_update(&mut self, ui: &mut Ui) {
         ui.horizontal(|ui| {
             if let Some(ref mut key) = self {
@@ -73,7 +73,7 @@ impl AppSection for SignatureKeyContainer {
                 }
             } else {
                 if ui.button("New").clicked() {
-                    *self = SignatureKey::generate_keypair().ok();
+                    *self = SigningKey::generate_keypair().ok();
                 }
                 if ui.button("Load").clicked() {}
             }
@@ -82,7 +82,7 @@ impl AppSection for SignatureKeyContainer {
 }
 
 #[derive(Clone)]
-enum SignatureKey {
+enum SigningKey {
     KeyPair {
         secret: secp256k1::SecretKey,
         public: secp256k1::PublicKey,

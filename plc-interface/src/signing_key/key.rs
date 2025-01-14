@@ -22,8 +22,8 @@ impl SigningKey {
 impl AppSection for SigningKey {
     fn draw_and_update(&mut self, ui: &mut Ui) {
         ui.horizontal(|ui| {
-            let key_str = format!("did:key:{}", self.as_did_key().formatted_value());
-            ui.label(RichText::new(key_str).monospace());
+            let did_key = self.as_did_key();
+            ui.label(RichText::new(did_key.formatted_value()).monospace());
         });
     }
 }

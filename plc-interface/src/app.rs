@@ -1,5 +1,6 @@
 use ::core::default::Default;
 use anyhow::Result;
+use derive_more::{Deref, DerefMut};
 use did_key::DidKey;
 use eframe::Frame;
 use egui::{Color32, Context, RichText, Ui};
@@ -60,20 +61,26 @@ impl AppSection for SigningKey {
     }
 }
 
-type SigningKeyContainer = Option<SigningKey>;
+#[repr(transparent)]
+#[derive(Clone, Default, Deref, DerefMut)]
+struct SigningKeyContainer(
+    #[deref]
+    #[deref_mut]
+    Option<SigningKey>,
+);
 
 impl AppSection for SigningKeyContainer {
     fn draw_and_update(&mut self, ui: &mut Ui) {
         ui.horizontal(|ui| {
-            if let Some(ref mut key) = self {
+            if let Some(ref mut key) = self.0 {
                 if ui.button("X").clicked() {
-                    *self = None;
+                    **self = None;
                 } else {
                     key.draw_and_update(ui);
                 }
             } else {
                 if ui.button("New").clicked() {
-                    *self = SigningKey::generate_keypair().ok();
+                    **self = SigningKey::generate_keypair().ok();
                 }
                 if ui.button("Load").clicked() {}
             }

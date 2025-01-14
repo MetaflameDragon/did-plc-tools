@@ -45,30 +45,19 @@ impl AppSection for SignatureKeyGenerator {
     fn draw_and_update(&mut self, ui: &mut Ui) {
         ui.horizontal(|ui| {
             if let Some(key) = &self.signature_key {
+                if ui.button("X").clicked() {
+                    self.signature_key = None;
+                }
+                else {
+                    let key_str = format!("did:key:{}", key.as_did_key().formatted_value());
+                    ui.label(RichText::new(key_str).monospace());
+                }
+            } else {
                 if ui.button("New").clicked() {
                     self.generate_and_load_keypair();
                 }
                 if ui.button("Load").clicked() {}
-            } else {
             }
-
-            ui.heading("did:key generator");
-
-            ui.horizontal(|ui| {
-                if ui.button("Generate new did:key").clicked() {
-                    self.generate_and_load_keypair();
-                }
-            });
-
-            ui.horizontal(|ui| {
-                ui.label(RichText::new("Loaded key: ").strong());
-                if let Some(key) = &self.signature_key {
-                    let key_str = format!("did:key:{}", key.as_did_key().formatted_value());
-                    ui.label(RichText::new(key_str).monospace());
-                } else {
-                    ui.label(RichText::new("None").italics().weak());
-                }
-            });
         });
     }
 }

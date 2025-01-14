@@ -31,6 +31,12 @@ impl DidKey {
     }
 }
 
+impl<T: SupportedKeyAlgo> From<T> for DidKey {
+    fn from(value: T) -> Self {
+        Self::from_public_key(value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::did_key::DidKey;

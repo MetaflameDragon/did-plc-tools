@@ -22,8 +22,7 @@ fn main() {
     let unsigned_op = UnsignedPlcOperation::new_genesis(
         rotation_keys
             .iter()
-            .map(|pair| pair.1)
-            .map(DidKey::from_public_key)
+            .map(|pair| pair.1.into())
             .collect(),
         HashMap::from([(
             "atproto".to_string(),

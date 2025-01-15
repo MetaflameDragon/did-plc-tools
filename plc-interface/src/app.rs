@@ -15,7 +15,7 @@ impl App {
         let pds_endpoint = Url::from_str("https://scalytooth.metaflame.dev")
             .expect("Failed to parse PDS endpoint URL");
         App {
-            plc_builder: PlcBuilderInterface::default().with_default_services(pds_endpoint),
+            plc_builder: PlcBuilderInterface::default().with_atproto_pds(pds_endpoint),
             ..Default::default()
         }
     }

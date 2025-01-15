@@ -1,5 +1,8 @@
 use crate::app::AppSection;
 use crate::plc_builder::aka::AlsoKnownAsInterface;
+use crate::plc_builder::rotation_keys::RotationKeysInterface;
+use crate::plc_builder::services::ServicesInterface;
+use crate::plc_builder::verification_methods::VerificationMethodsInterface;
 use crate::signing_key::SigningKeyArray;
 use did_key::DidKey;
 use did_plc::{AkaUri, PlcService};
@@ -15,9 +18,9 @@ mod verification_methods;
 #[derive(Default, Clone, Debug)]
 pub struct PlcBuilderInterface {
     also_known_as: AlsoKnownAsInterface,
-    rotation_keys: SigningKeyArray<5>,
-    verification_methods: HashMap<String, DidKey>,
-    services: HashMap<String, PlcService>,
+    rotation_keys: RotationKeysInterface,
+    verification_methods: VerificationMethodsInterface,
+    services: ServicesInterface,
     prev: Option<String>,
 }
 
@@ -31,22 +34,17 @@ impl AppSection for PlcBuilderInterface {
             self.rotation_keys.draw_and_update(ui);
 
             ui.heading("Verification methods:");
+            self.verification_methods.draw_and_update(ui);
 
             ui.heading("Services:");
+            self.services.draw_and_update(ui);
         });
     }
 }
 
 impl PlcBuilderInterface {
-    pub fn with_default_services(mut self, pds_endpoint: Url) -> Self {
-        self.services = Self::get_default_services(pds_endpoint);
+    pub fn with_atproto_pds(mut self, pds_endpoint: Url) -> Self {
+        self.services.add_atproto_pds(pds_endpoint);
         self
-    }
-
-    fn get_default_services(pds_endpoint: Url) -> HashMap<String, PlcService> {
-        HashMap::from([(
-            "atproto_pds".to_string(),
-            PlcService::new_atproto_pds(pds_endpoint),
-        )])
     }
 }

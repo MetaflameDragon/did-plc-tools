@@ -3,7 +3,7 @@ use derive_more::{Deref, DerefMut};
 use egui::Ui;
 
 #[repr(transparent)]
-#[derive(Clone, Default, Deref, DerefMut)]
+#[derive(Clone, Default, Deref, DerefMut, Debug)]
 pub struct SigningKeyContainer(
     #[deref]
     #[deref_mut]

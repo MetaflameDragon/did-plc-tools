@@ -6,10 +6,10 @@ use sha2::Digest;
 use std::{collections::HashMap, fmt::Display};
 use url::Url;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Signature(String);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AkaUri(String);
 
 impl AkaUri {
@@ -19,10 +19,10 @@ impl AkaUri {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlcService {
-    r#type: String,
-    endpoint: String,
+    pub r#type: String,
+    pub endpoint: String,
 }
 
 impl PlcService {

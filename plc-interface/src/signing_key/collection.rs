@@ -3,7 +3,7 @@ use crate::signing_key::{SigningKey, SigningKeyContainer};
 use derive_more::{Deref, DerefMut};
 use egui::Ui;
 
-#[derive(Deref, DerefMut, Clone)]
+#[derive(Deref, DerefMut, Clone, Debug)]
 pub struct SigningKeyArray<const N: usize> {
     #[deref]
     #[deref_mut]

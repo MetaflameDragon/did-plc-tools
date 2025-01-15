@@ -4,6 +4,7 @@ extern crate core;
 
 mod app;
 mod signing_key;
+mod plc_builder;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> eframe::Result {

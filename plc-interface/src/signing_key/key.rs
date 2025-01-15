@@ -28,7 +28,7 @@ impl AppSection for SigningKey {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum SigningKey {
     KeyPair {
         secret: secp256k1::SecretKey,

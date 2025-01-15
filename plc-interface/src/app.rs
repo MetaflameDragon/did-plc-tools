@@ -2,6 +2,8 @@ use crate::plc_builder::PlcBuilderInterface;
 use ::core::default::Default;
 use eframe::Frame;
 use egui::{Context, Ui};
+use std::str::FromStr;
+use url::Url;
 
 #[derive(Default)]
 pub struct App {
@@ -10,8 +12,10 @@ pub struct App {
 
 impl App {
     pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
+        let pds_endpoint = Url::from_str("https://scalytooth.metaflame.dev")
+            .expect("Failed to parse PDS endpoint URL");
         App {
-            plc_builder: PlcBuilderInterface::default().with_default_services(),
+            plc_builder: PlcBuilderInterface::default().with_default_services(pds_endpoint),
             ..Default::default()
         }
     }

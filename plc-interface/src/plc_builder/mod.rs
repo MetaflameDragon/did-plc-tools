@@ -4,7 +4,7 @@ use did_key::DidKey;
 use did_plc::{AkaUri, PlcService};
 use egui::Ui;
 use std::collections::HashMap;
-use derive_new::new;
+use url::Url;
 
 #[derive(Default, Clone, Debug)]
 pub struct PlcBuilderInterface {
@@ -25,18 +25,15 @@ impl AppSection for PlcBuilderInterface {
 }
 
 impl PlcBuilderInterface {
-    pub fn with_default_services(mut self) -> Self {
-        self.services = Self::get_default_services();
+    pub fn with_default_services(mut self, pds_endpoint: Url) -> Self {
+        self.services = Self::get_default_services(pds_endpoint);
         self
     }
 
-    fn get_default_services() -> HashMap<String, PlcService> {
+    fn get_default_services(pds_endpoint: Url) -> HashMap<String, PlcService> {
         HashMap::from([(
             "atproto_pds".to_string(),
-            PlcService {
-                r#type: "AtprotoPersonalDataServer".to_string(),
-                endpoint: "https://scalytooth.metaflame.dev".to_string(),
-            },
+            PlcService::new_atproto_pds(pds_endpoint),
         )])
     }
 }

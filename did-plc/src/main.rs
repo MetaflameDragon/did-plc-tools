@@ -26,7 +26,10 @@ fn main() {
             DidKey::from_public_key(&signing_key_pub),
         )]),
         vec![AkaUri::new_at(handle)],
-        HashMap::from([("atproto_pds".to_string(), PlcService::new_at_pds(&endpoint))]),
+        HashMap::from([(
+            "atproto_pds".to_string(),
+            PlcService::new_atproto_pds(endpoint),
+        )]),
     );
 
     dbg!(&unsigned_op);

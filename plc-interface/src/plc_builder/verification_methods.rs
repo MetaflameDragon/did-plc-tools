@@ -39,6 +39,10 @@ impl AppSection for VerificationMethodsInterface {
 }
 
 impl VerificationMethodsInterface {
+    pub fn get_map(&self) -> &HashMap<String, SigningKey> {
+        self.map_renderer.inner()
+    }
+
     fn draw_input_field(&mut self, ui: &mut Ui) {
         ui.vertical(|ui| {
             ui.group(|ui| {

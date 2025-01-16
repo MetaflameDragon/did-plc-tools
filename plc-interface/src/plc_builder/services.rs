@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::app::AppSection;
 use crate::ui_helpers::hash_map::HashMapRenderer;
 use did_plc::PlcService;
@@ -29,6 +30,10 @@ impl ServicesInterface {
             "atproto_pds".to_string(),
             PlcService::new_atproto_pds(pds_endpoint),
         );
+    }
+
+    pub fn get_map(&self) -> &HashMap<String, PlcService> {
+        self.services.inner()
     }
 }
 

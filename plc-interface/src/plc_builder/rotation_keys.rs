@@ -12,3 +12,9 @@ impl AppSection for RotationKeysInterface {
         self.rotation_keys.draw_and_update(ui)
     }
 }
+
+impl RotationKeysInterface {
+    pub fn keys(&self) -> &SigningKeyArray<5> {
+        &self.rotation_keys
+    }
+}

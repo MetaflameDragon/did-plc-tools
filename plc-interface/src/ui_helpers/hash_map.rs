@@ -42,8 +42,9 @@ impl<K, V> HashMapRenderer<K, V> {
 
 impl<K, V> AppSection for HashMapRenderer<K, V>
 where
-    K: ToString,
-    V: AppSection, {
+    K: ToString + Clone + Eq + Hash,
+    V: AppSection,
+{
     fn draw_and_update(&mut self, ui: &mut Ui) {
         Self::draw_map_items(&mut self.map, ui);
     }
@@ -51,7 +52,7 @@ where
 
 impl<K, V> HashMapRenderer<K, V>
 where
-    K: ToString,
+    K: ToString + Clone + Eq + Hash,
     V: AppSection,
 {
     fn draw_map_items(map: &mut HashMap<K, V>, ui: &mut Ui) {
@@ -60,18 +61,18 @@ where
                 if map.is_empty() {
                     ui.label(RichText::new("Empty").weak().italics());
                 } else {
-                    // let mut key_to_remove = None;
+                    let mut key_to_remove = None;
 
                     for (key, mut value) in &mut *map {
                         let should_remove = Self::draw_item(&key.to_string(), &mut value, ui);
                         if should_remove {
-                            // key_to_remove = Some(name.clone());
+                            key_to_remove = Some(key.clone());
                         }
                     }
 
-                    // if let Some(name) = key_to_remove {
-                    //     map.remove(&name);
-                    // }
+                    if let Some(name) = key_to_remove {
+                        map.remove(&name);
+                    }
                 }
             })
         });

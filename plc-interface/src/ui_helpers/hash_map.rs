@@ -1,6 +1,6 @@
 use crate::app::AppSection;
 use derive_more::{Deref, DerefMut, Into};
-use egui::{RichText, Ui};
+use egui::{Button, RichText, Ui, Widget};
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
@@ -11,12 +11,14 @@ pub struct HashMapRenderer<K, V> {
     #[deref_mut]
     #[into]
     map: HashMap<K, V>,
+    pub allow_remove: bool,
 }
 
 impl<K, V> Default for HashMapRenderer<K, V> {
     fn default() -> Self {
         Self {
             map: Default::default(),
+            allow_remove: true,
         }
     }
 }
@@ -46,7 +48,7 @@ where
     V: AppSection,
 {
     fn draw_and_update(&mut self, ui: &mut Ui) {
-        Self::draw_map_items(&mut self.map, ui);
+        Self::draw_map_items(&mut self.map, self.allow_remove, ui);
     }
 }
 
@@ -55,7 +57,7 @@ where
     K: ToString + Clone + Eq + Hash,
     V: AppSection,
 {
-    fn draw_map_items(map: &mut HashMap<K, V>, ui: &mut Ui) {
+    fn draw_map_items(map: &mut HashMap<K, V>, allow_removing: bool, ui: &mut Ui) {
         ui.group(|ui| {
             ui.vertical(|ui| {
                 if map.is_empty() {
@@ -64,7 +66,8 @@ where
                     let mut key_to_remove = None;
 
                     for (key, mut value) in &mut *map {
-                        let should_remove = Self::draw_item(&key.to_string(), &mut value, ui);
+                        let should_remove =
+                            Self::draw_item(&key.to_string(), &mut value, allow_removing, ui);
                         if should_remove {
                             key_to_remove = Some(key.clone());
                         }
@@ -79,12 +82,15 @@ where
     }
 
     /// Returns true if the X (remove) button is clicked
-    fn draw_item(key: &str, value: &mut V, ui: &mut Ui) -> bool {
+    fn draw_item(key: &str, value: &mut V, allow_removing: bool, ui: &mut Ui) -> bool {
         let mut should_remove = false;
         ui.vertical(|ui| {
             ui.horizontal(|ui| {
-                let resp = ui.button("X");
-                should_remove = resp.clicked();
+                if allow_removing {
+                    let remove_button = Button::new("X");
+                    let resp = remove_button.ui(ui);
+                    should_remove = resp.clicked();
+                }
                 ui.label(&*key);
             });
             value.draw_and_update(ui);

@@ -1,13 +1,20 @@
 use crate::app::AppSection;
+use crate::ui_helpers::hash_map::HashMapRenderer;
 use did_plc::PlcService;
 use egui::{RichText, Ui};
-use std::collections::HashMap;
 use url::Url;
-use crate::ui_helpers::hash_map::HashMapRenderer;
 
-#[derive(Default, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct ServicesInterface {
     services: HashMapRenderer<String, PlcService>,
+}
+
+impl Default for ServicesInterface {
+    fn default() -> Self {
+        let mut services: HashMapRenderer<_, _> = Default::default();
+        services.allow_remove = false;
+        Self { services }
+    }
 }
 
 impl AppSection for ServicesInterface {

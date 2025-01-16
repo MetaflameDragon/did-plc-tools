@@ -10,7 +10,9 @@ pub struct ServicesInterface {
 }
 
 impl AppSection for ServicesInterface {
-    fn draw_and_update(&mut self, ui: &mut Ui) {}
+    fn draw_and_update(&mut self, ui: &mut Ui) {
+
+    }
 }
 
 impl ServicesInterface {

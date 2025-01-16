@@ -1,5 +1,6 @@
 use crate::app::AppSection;
 use crate::signing_key::{SigningKey, SigningKeyContainer};
+use crate::ui_helpers::hash_map::HashMapRenderer;
 use anyhow::{bail, Result};
 use egui::{RichText, TextBuffer, Ui};
 use log::error;
@@ -7,7 +8,7 @@ use std::collections::HashMap;
 
 #[derive(Default, Clone, Debug)]
 pub struct VerificationMethodsInterface {
-    verification_methods: HashMap<String, SigningKey>,
+    map_renderer: HashMapRenderer<String, SigningKey>,
     input_fields: InputFields,
 }
 
@@ -32,7 +33,7 @@ impl InputFields {
 
 impl AppSection for VerificationMethodsInterface {
     fn draw_and_update(&mut self, ui: &mut Ui) {
-        draw_verification_method_set(&mut self.verification_methods, ui);
+        self.map_renderer.draw_and_update(ui);
         self.draw_input_field(ui);
     }
 }
@@ -50,7 +51,7 @@ impl VerificationMethodsInterface {
                 let res = self.input_fields.try_get_verification_method();
                 match res {
                     Ok((name, key)) => {
-                        self.verification_methods.insert(name, key);
+                        self.map_renderer.inner_mut().insert(name, key);
                     }
                     Err(err) => {
                         error!("{}", err);
@@ -59,42 +60,4 @@ impl VerificationMethodsInterface {
             }
         });
     }
-}
-
-fn draw_verification_method_set(map: &mut HashMap<String, SigningKey>, ui: &mut Ui) {
-    ui.group(|ui| {
-        ui.vertical(|ui| {
-            if map.is_empty() {
-                ui.label(RichText::new("No verification methods").weak().italics());
-            } else {
-                let mut key_to_remove = None;
-
-                for (name, mut key) in &mut *map {
-                    let should_remove = draw_verification_method(&name, &mut key, ui);
-                    if should_remove {
-                        key_to_remove = Some(name.clone());
-                    }
-                }
-
-                if let Some(name) = key_to_remove {
-                    map.remove(&name);
-                }
-            }
-        })
-    });
-}
-
-/// Returns true if the X (remove) button is clicked
-fn draw_verification_method(name: &str, key: &mut SigningKey, ui: &mut Ui) -> bool {
-    let mut should_remove = false;
-    ui.vertical(|ui| {
-        ui.horizontal(|ui| {
-            let resp = ui.button("X");
-            should_remove = resp.clicked();
-            ui.label(&*name);
-        });
-        key.draw_and_update(ui);
-    });
-
-    should_remove
 }

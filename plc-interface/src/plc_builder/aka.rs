@@ -1,4 +1,6 @@
 use crate::app::AppSection;
+use anyhow::Context;
+use anyhow::Result;
 use did_plc::AkaUri;
 use egui::Ui;
 
@@ -14,7 +16,10 @@ impl AppSection for AlsoKnownAsInterface {
 }
 
 impl AlsoKnownAsInterface {
-    pub fn get_aka_uris(&self) -> Vec<AkaUri> {
-        todo!()
+    pub fn get_aka_uris(&self) -> Result<Vec<AkaUri>> {
+        self.entries_multiline
+            .lines()
+            .map(|line| TryInto::<AkaUri>::try_into(line).context("Failed to parse line as AkaUri"))
+            .collect()
     }
 }

@@ -1,3 +1,5 @@
+#![feature(never_type)]
+
 use base64::prelude::*;
 use did_key::DidKey;
 use secp256k1::Message;
@@ -15,7 +17,17 @@ pub struct AkaUri(String);
 impl AkaUri {
     /// Authority must be a DID (PLC or web) or a domain
     pub fn new_at(authority: &str) -> Self {
+        // TODO Validate
         AkaUri(format!("at://{authority}"))
+    }
+}
+
+impl TryFrom<&str> for AkaUri {
+    type Error = !;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        // TODO Validate
+        Ok(Self(value.to_string()))
     }
 }
 

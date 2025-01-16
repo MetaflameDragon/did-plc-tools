@@ -1,12 +1,15 @@
 use crate::app::AppSection;
-use crate::signing_key::SigningKey;
+use derive_more::{Deref, DerefMut, Into};
 use egui::{RichText, Ui};
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deref, DerefMut, Into)]
 pub struct HashMapRenderer<K, V> {
+    #[deref]
+    #[deref_mut]
+    #[into]
     map: HashMap<K, V>,
 }
 

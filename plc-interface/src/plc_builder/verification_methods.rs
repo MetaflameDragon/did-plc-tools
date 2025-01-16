@@ -51,7 +51,7 @@ impl VerificationMethodsInterface {
                 let res = self.input_fields.try_get_verification_method();
                 match res {
                     Ok((name, key)) => {
-                        self.map_renderer.inner_mut().insert(name, key);
+                        self.map_renderer.insert(name, key);
                     }
                     Err(err) => {
                         error!("{}", err);

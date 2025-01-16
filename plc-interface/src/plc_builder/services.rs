@@ -1,17 +1,18 @@
 use crate::app::AppSection;
 use did_plc::PlcService;
-use egui::Ui;
+use egui::{RichText, Ui};
 use std::collections::HashMap;
 use url::Url;
+use crate::ui_helpers::hash_map::HashMapRenderer;
 
 #[derive(Default, Clone, Debug)]
 pub struct ServicesInterface {
-    services: HashMap<String, PlcService>,
+    services: HashMapRenderer<String, PlcService>,
 }
 
 impl AppSection for ServicesInterface {
     fn draw_and_update(&mut self, ui: &mut Ui) {
-
+        self.services.draw_and_update(ui);
     }
 }
 
@@ -21,5 +22,14 @@ impl ServicesInterface {
             "atproto_pds".to_string(),
             PlcService::new_atproto_pds(pds_endpoint),
         );
+    }
+}
+
+impl AppSection for PlcService {
+    fn draw_and_update(&mut self, ui: &mut Ui) {
+        ui.vertical(|ui| {
+            ui.label(RichText::new(&self.r#type).italics().weak());
+            ui.label(RichText::new(&self.endpoint.to_string()).underline());
+        });
     }
 }

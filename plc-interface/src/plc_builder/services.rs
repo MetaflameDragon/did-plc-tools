@@ -1,8 +1,8 @@
-use std::collections::HashMap;
 use crate::app::AppSection;
 use crate::ui_helpers::hash_map::HashMapRenderer;
 use did_plc::PlcService;
 use egui::{RichText, Ui};
+use std::collections::HashMap;
 use url::Url;
 
 #[derive(Clone, Debug)]

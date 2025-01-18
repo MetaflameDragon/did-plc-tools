@@ -89,10 +89,15 @@ impl PlcBuilderInterface {
 
         if ui.button("Sign operation").clicked() {
             let plc_op = self.get_unsigned_plc_op_genesis();
-            let signing_key = self.rotation_keys.keys().first();
+            let signing_key = self
+                .rotation_keys
+                .keys()
+                .first()
+                .map(|cont| cont.deref().as_ref())
+                .flatten();
 
             let signed_op = match plc_op {
-                Ok(plc_op) => match signing_key.map(|cont| cont.deref().as_ref()).flatten() {
+                Ok(plc_op) => match signing_key {
                     None => Err(anyhow!("Missing rotation keys")),
                     Some(SigningKey::KeyPair {
                         secret: secret_key, ..
@@ -110,7 +115,7 @@ impl PlcBuilderInterface {
                     info!("{did_plc}");
                 }
                 Err(err) => {
-                    error!("{err}")
+                    error!("{err}");
                 }
             }
         }

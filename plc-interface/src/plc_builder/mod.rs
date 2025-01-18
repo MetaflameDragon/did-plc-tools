@@ -4,9 +4,9 @@ use crate::plc_builder::rotation_keys::RotationKeysInterface;
 use crate::plc_builder::services::ServicesInterface;
 use crate::plc_builder::verification_methods::VerificationMethodsInterface;
 use crate::signing_key::{SigningKey, SigningKeyArray, SigningKeyContainer};
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use did_key::DidKey;
-use did_plc::{AkaUri, PlcService, UnsignedPlcOperation};
+use did_plc::{AkaUri, PlcService, SignedPlcOperation, UnsignedPlcOperation};
 use egui::Ui;
 use log::{error, info};
 use std::collections::HashMap;
@@ -89,29 +89,25 @@ impl PlcBuilderInterface {
 
         if ui.button("Sign operation").clicked() {
             let plc_op = self.get_unsigned_plc_op_genesis();
-            match plc_op {
-                Ok(plc_op) => {
-                    match self
-                        .rotation_keys
-                        .keys()
-                        .first()
-                        .map(|cont| cont.deref().as_ref())
-                        .flatten()
-                    {
-                        None => {
-                            error!("Missing rotation keys");
-                        }
-                        Some(SigningKey::KeyPair {
-                            secret: secret_key, ..
-                        }) => {
-                            let signed_op = plc_op.sign(secret_key);
-                            let did_plc = signed_op.get_did_plc();
-                            let json = serde_json::ser::to_string_pretty(&signed_op)
-                                .unwrap_or("Failed to serialize signed plc operation".to_string());
-                            info!("{json}");
-                            info!("{did_plc}");
-                        }
-                    };
+            let signing_key = self.rotation_keys.keys().first();
+
+            let signed_op = match plc_op {
+                Ok(plc_op) => match signing_key.map(|cont| cont.deref().as_ref()).flatten() {
+                    None => Err(anyhow!("Missing rotation keys")),
+                    Some(SigningKey::KeyPair {
+                        secret: secret_key, ..
+                    }) => Ok(plc_op.sign(secret_key)),
+                },
+                Err(err) => Err(err),
+            };
+
+            match signed_op {
+                Ok(signed_op) => {
+                    let did_plc = signed_op.get_did_plc();
+                    let json = serde_json::ser::to_string_pretty(&signed_op)
+                        .unwrap_or("Failed to serialize signed plc operation".to_string());
+                    info!("{json}");
+                    info!("{did_plc}");
                 }
                 Err(err) => {
                     error!("{err}")

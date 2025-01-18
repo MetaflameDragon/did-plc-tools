@@ -92,9 +92,9 @@ impl PlcBuilderInterface {
             let signing_key = self
                 .rotation_keys
                 .keys()
-                .first()
-                .map(|cont| cont.deref().as_ref())
-                .flatten();
+                .iter()
+                .filter_map(|cont| cont.deref().as_ref())
+                .next();
 
             let signed_op = match plc_op {
                 Ok(plc_op) => match signing_key {

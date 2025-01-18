@@ -1,4 +1,6 @@
 #![feature(never_type)]
+#[macro_use]
+extern crate derive_getters;
 
 use base64::prelude::*;
 use did_key::DidKey;
@@ -70,6 +72,11 @@ impl SignedPlcOperation {
             sig: Signature(signature_base64url),
         }
     }
+
+    pub fn get_did_plc(&self) -> DidPlc {
+        // TODO: Limit to genesis op?
+        DidPlc::from_signed_op(self)
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -113,6 +120,30 @@ impl UnsignedPlcOperation {
             services,
             prev: None,
         }
+    }
+
+    pub fn sign(self, signing_key: &secp256k1::SecretKey) -> SignedPlcOperation {
+        SignedPlcOperation::new(self, signing_key)
+    }
+
+    pub fn r#type(&self) -> &str {
+        &self.r#type
+    }
+    pub fn rotation_keys(&self) -> &[DidKey] {
+        &self.rotation_keys
+    }
+    pub fn verification_methods(&self) -> &HashMap<String, DidKey> {
+        &self.verification_methods
+    }
+    pub fn also_known_as(&self) -> &[AkaUri] {
+        &self.also_known_as
+    }
+    pub fn services(&self) -> &HashMap<String, PlcService> {
+        &self.services
+    }
+
+    pub fn prev(&self) -> Option<&PlcOperationRef> {
+        self.prev.as_ref()
     }
 }
 

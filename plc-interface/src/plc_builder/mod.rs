@@ -3,13 +3,14 @@ use crate::plc_builder::aka::AlsoKnownAsInterface;
 use crate::plc_builder::rotation_keys::RotationKeysInterface;
 use crate::plc_builder::services::ServicesInterface;
 use crate::plc_builder::verification_methods::VerificationMethodsInterface;
-use crate::signing_key::{SigningKey, SigningKeyArray};
+use crate::signing_key::{SigningKey, SigningKeyArray, SigningKeyContainer};
 use anyhow::{Context, Result};
 use did_key::DidKey;
 use did_plc::{AkaUri, PlcService, UnsignedPlcOperation};
 use egui::Ui;
 use log::{error, info};
 use std::collections::HashMap;
+use std::ops::Deref;
 use url::Url;
 
 mod aka;
@@ -79,6 +80,38 @@ impl PlcBuilderInterface {
                     let json = serde_json::ser::to_string_pretty(&plc_op)
                         .unwrap_or("Failed to serialize plc operation".to_string());
                     info!("{json}");
+                }
+                Err(err) => {
+                    error!("{err}")
+                }
+            }
+        }
+
+        if ui.button("Sign operation").clicked() {
+            let plc_op = self.get_unsigned_plc_op_genesis();
+            match plc_op {
+                Ok(plc_op) => {
+                    match self
+                        .rotation_keys
+                        .keys()
+                        .first()
+                        .map(|cont| cont.deref().as_ref())
+                        .flatten()
+                    {
+                        None => {
+                            error!("Missing rotation keys");
+                        }
+                        Some(SigningKey::KeyPair {
+                            secret: secret_key, ..
+                        }) => {
+                            let signed_op = plc_op.sign(secret_key);
+                            let did_plc = signed_op.get_did_plc();
+                            let json = serde_json::ser::to_string_pretty(&signed_op)
+                                .unwrap_or("Failed to serialize signed plc operation".to_string());
+                            info!("{json}");
+                            info!("{did_plc}");
+                        }
+                    };
                 }
                 Err(err) => {
                     error!("{err}")

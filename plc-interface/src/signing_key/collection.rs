@@ -1,5 +1,5 @@
 use crate::app::AppSection;
-use crate::signing_key::{SigningKey, SigningKeyContainer};
+use crate::signing_key::{CryptoKey, CryptoKeyContainer};
 use derive_more::{Deref, DerefMut};
 use egui::Ui;
 
@@ -7,7 +7,7 @@ use egui::Ui;
 pub struct SigningKeyArray<const N: usize> {
     #[deref]
     #[deref_mut]
-    keys: [SigningKeyContainer; N],
+    keys: [CryptoKeyContainer; N],
 }
 
 impl<const N: usize> Default for SigningKeyArray<N> {

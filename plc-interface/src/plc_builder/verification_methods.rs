@@ -1,5 +1,5 @@
 use crate::app::AppSection;
-use crate::signing_key::{SigningKey, SigningKeyContainer};
+use crate::signing_key::{CryptoKey, CryptoKeyContainer};
 use crate::ui_helpers::hash_map::HashMapRenderer;
 use anyhow::{bail, Result};
 use egui::{RichText, TextBuffer, Ui};
@@ -8,18 +8,18 @@ use std::collections::HashMap;
 
 #[derive(Default, Clone, Debug)]
 pub struct VerificationMethodsInterface {
-    map_renderer: HashMapRenderer<String, SigningKey>,
+    map_renderer: HashMapRenderer<String, CryptoKey>,
     input_fields: InputFields,
 }
 
 #[derive(Default, Clone, Debug)]
 struct InputFields {
     name: String,
-    key: SigningKeyContainer,
+    key: CryptoKeyContainer,
 }
 
 impl InputFields {
-    fn try_get_verification_method(&mut self) -> Result<(String, SigningKey)> {
+    fn try_get_verification_method(&mut self) -> Result<(String, CryptoKey)> {
         if self.name.is_empty() {
             bail!("Name is empty")
         }
@@ -39,7 +39,7 @@ impl AppSection for VerificationMethodsInterface {
 }
 
 impl VerificationMethodsInterface {
-    pub fn get_map(&self) -> &HashMap<String, SigningKey> {
+    pub fn get_map(&self) -> &HashMap<String, CryptoKey> {
         self.map_renderer.inner()
     }
 

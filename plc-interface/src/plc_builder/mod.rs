@@ -3,7 +3,7 @@ use crate::plc_builder::aka::AlsoKnownAsInterface;
 use crate::plc_builder::rotation_keys::RotationKeysInterface;
 use crate::plc_builder::services::ServicesInterface;
 use crate::plc_builder::verification_methods::VerificationMethodsInterface;
-use crate::signing_key::{SigningKey, SigningKeyArray, SigningKeyContainer};
+use crate::signing_key::{CryptoKey, SigningKeyArray, CryptoKeyContainer};
 use anyhow::{anyhow, Context, Result};
 use did_key::DidKey;
 use did_plc::{AkaUri, PlcService, SignedPlcOperation, UnsignedPlcOperation};
@@ -11,6 +11,7 @@ use egui::Ui;
 use log::{error, info};
 use std::collections::HashMap;
 use std::ops::Deref;
+use secp256k1::Keypair;
 use url::Url;
 
 mod aka;
@@ -99,7 +100,10 @@ impl PlcBuilderInterface {
             let signed_op = match plc_op {
                 Ok(plc_op) => match signing_key {
                     None => Err(anyhow!("Missing rotation keys")),
-                    Some(SigningKey::KeyPair { keypair }) => Ok(plc_op.sign(&keypair.secret_key())),
+                    Some(signing_key) => match signing_key.keypair() {
+                        None => Err(anyhow!("Signing key is not owned (no private part)")),
+                        Some(keypair) => { Ok(plc_op.sign(&keypair.secret_key())) }
+                    },
                 },
                 Err(err) => Err(err),
             };

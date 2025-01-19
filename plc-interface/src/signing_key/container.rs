@@ -1,5 +1,5 @@
 use crate::ui_helpers::emoji;
-use crate::{app::AppSection, signing_key::key::SigningKey};
+use crate::{app::AppSection, signing_key::key::CryptoKey};
 use derive_more::{Deref, DerefMut};
 use egui::{Color32, Modal, Ui, Widget};
 use log::{error, info};
@@ -7,16 +7,16 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Default, Deref, DerefMut, Debug)]
-pub struct SigningKeyContainer {
+pub struct CryptoKeyContainer {
     #[deref]
     #[deref_mut]
-    key: Option<SigningKey>,
+    key: Option<CryptoKey>,
 
     is_load_modal_open: bool,
     load_path_buf_str: String,
 }
 
-impl AppSection for SigningKeyContainer {
+impl AppSection for CryptoKeyContainer {
     fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
         ui.horizontal(|ui| {
             if let Some(ref mut key) = self.key {
@@ -46,7 +46,7 @@ impl AppSection for SigningKeyContainer {
             } else {
                 // Draw key generation options
                 if ui.button("New").clicked() {
-                    self.key = SigningKey::generate_keypair().ok();
+                    self.key = CryptoKey::generate_keypair().ok();
                 }
                 if ui.button("Load").clicked() {
                     self.is_load_modal_open = true;
@@ -69,7 +69,7 @@ impl AppSection for SigningKeyContainer {
                     }
                 }) {
                     if let Some(path) = &dropped_file.path {
-                        match SigningKey::load_keypair(path) {
+                        match CryptoKey::load_keypair(path) {
                             Ok(key) => {
                                 self.key = Some(key);
                             }
@@ -103,7 +103,7 @@ impl AppSection for SigningKeyContainer {
                             .input(|state| state.key_down(egui::Key::Enter));
                     if confirm_button_resp.clicked() || user_confirmed_field {
                         let path = Path::new(&self.load_path_buf_str);
-                        match SigningKey::load_keypair(path) {
+                        match CryptoKey::load_keypair(path) {
                             Ok(key) => {
                                 self.key = Some(key);
                                 self.load_path_buf_str.clear();
@@ -131,7 +131,7 @@ enum DrawKeyResponse {
 }
 
 fn draw_contained_key(
-    key: &mut SigningKey,
+    key: &mut CryptoKey,
     ctx: &egui::Context,
     ui: &mut Ui,
 ) -> Option<DrawKeyResponse> {

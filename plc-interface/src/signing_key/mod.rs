@@ -5,5 +5,5 @@ mod container;
 mod key;
 
 pub use collection::SigningKeyArray;
-pub use container::SigningKeyContainer;
-pub use key::SigningKey;
+pub use container::CryptoKeyContainer;
+pub use key::CryptoKey;

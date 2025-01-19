@@ -6,10 +6,6 @@ use serde::Serialize;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-mod emoji {
-    pub const FLOPPY_DISK: &str = "\u{1f4be}";
-}
-
 impl SigningKey {
     pub fn generate_keypair() -> anyhow::Result<Self> {
         let global_context = secp256k1::global::SECP256K1;
@@ -46,22 +42,6 @@ impl AppSection for SigningKey {
     fn draw_and_update(&mut self, ui: &mut Ui) {
         ui.horizontal(|ui| {
             let did_key = self.as_did_key();
-
-            if ui.small_button(emoji::FLOPPY_DISK).clicked() {
-                let did_key_name = did_key.formatted_value().replace(":", "_");
-                let path = format!("{did_key_name}.secp256k1.priv");
-                let path = PathBuf::from(path);
-
-                let result = self.save_keypair(&path);
-                match result {
-                    Ok(()) => {
-                        info!("Key saved to {}", path.display());
-                    }
-                    Err(err) => {
-                        error!("{err}");
-                    }
-                }
-            }
 
             ui.label(RichText::new(did_key.formatted_value()).monospace());
         });

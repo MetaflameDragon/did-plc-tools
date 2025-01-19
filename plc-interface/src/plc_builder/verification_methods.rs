@@ -32,9 +32,9 @@ impl InputFields {
 }
 
 impl AppSection for VerificationMethodsInterface {
-    fn draw_and_update(&mut self, ui: &mut Ui) {
-        self.map_renderer.draw_and_update(ui);
-        self.draw_input_field(ui);
+    fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
+        self.map_renderer.draw_and_update(ctx, ui);
+        self.draw_input_field(ctx, ui);
     }
 }
 
@@ -43,12 +43,12 @@ impl VerificationMethodsInterface {
         self.map_renderer.inner()
     }
 
-    fn draw_input_field(&mut self, ui: &mut Ui) {
+    fn draw_input_field(&mut self, ctx: &egui::Context, ui: &mut Ui) {
         ui.vertical(|ui| {
             ui.group(|ui| {
                 ui.vertical(|ui| {
                     ui.text_edit_singleline(&mut self.input_fields.name);
-                    self.input_fields.key.draw_and_update(ui);
+                    self.input_fields.key.draw_and_update(ctx, ui);
                 });
             });
             if ui.button("Add").clicked() {

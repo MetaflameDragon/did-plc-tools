@@ -39,7 +39,7 @@ impl SigningKey {
 }
 
 impl AppSection for SigningKey {
-    fn draw_and_update(&mut self, ui: &mut Ui) {
+    fn draw_and_update(&mut self, _ctx: &egui::Context, ui: &mut Ui) {
         ui.horizontal(|ui| {
             let did_key = self.as_did_key();
 

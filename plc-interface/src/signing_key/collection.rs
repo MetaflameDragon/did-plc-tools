@@ -19,10 +19,10 @@ impl<const N: usize> Default for SigningKeyArray<N> {
 }
 
 impl<const N: usize> AppSection for SigningKeyArray<N> {
-    fn draw_and_update(&mut self, ui: &mut Ui) {
+    fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
         ui.group(|ui| {
             for key in self.keys.iter_mut() {
-                key.draw_and_update(ui);
+                key.draw_and_update(ctx, ui);
             }
         });
     }

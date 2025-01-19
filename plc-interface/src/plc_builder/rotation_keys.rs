@@ -8,8 +8,8 @@ pub struct RotationKeysInterface {
 }
 
 impl AppSection for RotationKeysInterface {
-    fn draw_and_update(&mut self, ui: &mut Ui) {
-        self.rotation_keys.draw_and_update(ui)
+    fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
+        self.rotation_keys.draw_and_update(ctx, ui)
     }
 }
 

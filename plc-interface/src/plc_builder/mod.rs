@@ -28,19 +28,19 @@ pub struct PlcBuilderInterface {
 }
 
 impl AppSection for PlcBuilderInterface {
-    fn draw_and_update(&mut self, ui: &mut Ui) {
+    fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
         ui.vertical(|ui| {
             ui.heading("Also known as:");
-            self.also_known_as.draw_and_update(ui);
+            self.also_known_as.draw_and_update(ctx, ui);
 
             ui.heading("Rotation keys:");
-            self.rotation_keys.draw_and_update(ui);
+            self.rotation_keys.draw_and_update(ctx, ui);
 
             ui.heading("Verification methods:");
-            self.verification_methods.draw_and_update(ui);
+            self.verification_methods.draw_and_update(ctx, ui);
 
             ui.heading("Services:");
-            self.services.draw_and_update(ui);
+            self.services.draw_and_update(ctx, ui);
 
             ui.group(|ui| self.draw_action_column(ui));
         });

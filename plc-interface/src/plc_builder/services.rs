@@ -19,8 +19,8 @@ impl Default for ServicesInterface {
 }
 
 impl AppSection for ServicesInterface {
-    fn draw_and_update(&mut self, ui: &mut Ui) {
-        self.services.draw_and_update(ui);
+    fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
+        self.services.draw_and_update(ctx, ui);
     }
 }
 
@@ -38,7 +38,7 @@ impl ServicesInterface {
 }
 
 impl AppSection for PlcService {
-    fn draw_and_update(&mut self, ui: &mut Ui) {
+    fn draw_and_update(&mut self, _ctx: &egui::Context, ui: &mut Ui) {
         ui.vertical(|ui| {
             ui.label(RichText::new(&self.r#type).italics().weak());
             ui.label(RichText::new(&self.endpoint.to_string()).underline());

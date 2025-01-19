@@ -10,7 +10,7 @@ pub struct AlsoKnownAsInterface {
 }
 
 impl AppSection for AlsoKnownAsInterface {
-    fn draw_and_update(&mut self, ui: &mut Ui) {
+    fn draw_and_update(&mut self, _ctx: &egui::Context, ui: &mut Ui) {
         ui.text_edit_multiline(&mut self.entries_multiline);
     }
 }

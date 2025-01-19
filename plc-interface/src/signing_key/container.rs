@@ -14,11 +14,11 @@ pub struct SigningKeyContainer {
 }
 
 impl AppSection for SigningKeyContainer {
-    fn draw_and_update(&mut self, ui: &mut Ui) {
+    fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
         ui.horizontal(|ui| {
             if let Some(ref mut key) = self.key {
                 // Draw contained key
-                match draw_contained_key(key, ui) {
+                match draw_contained_key(key, ctx, ui) {
                     None => {}
                     Some(DrawKeyResponse::DeleteKey) => {
                         self.key = None;
@@ -45,7 +45,9 @@ impl AppSection for SigningKeyContainer {
                 if ui.button("New").clicked() {
                     self.key = SigningKey::generate_keypair().ok();
                 }
-                if ui.button("Load").clicked() {}
+                if ui.button("Load").clicked() {
+                    self.is_load_modal_open = true;
+                }
             }
         });
     }
@@ -56,7 +58,7 @@ enum DrawKeyResponse {
     SaveKey,
 }
 
-fn draw_contained_key(key: &mut SigningKey, ui: &mut Ui) -> Option<DrawKeyResponse> {
+fn draw_contained_key(key: &mut SigningKey, ctx: &egui::Context, ui: &mut Ui) -> Option<DrawKeyResponse> {
     if ui.button("X").clicked() {
         return Some(DrawKeyResponse::DeleteKey);
     }
@@ -65,7 +67,7 @@ fn draw_contained_key(key: &mut SigningKey, ui: &mut Ui) -> Option<DrawKeyRespon
         return Some(DrawKeyResponse::SaveKey);
     }
 
-    key.draw_and_update(ui);
+    key.draw_and_update(ctx, ui);
 
     None
 }

@@ -23,10 +23,10 @@ impl App {
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &Context, frame: &mut Frame) {
-        egui::panel::CentralPanel::default().show(ctx, |ui| self.plc_builder.draw_and_update(ui));
+        egui::panel::CentralPanel::default().show(ctx, |ui| self.plc_builder.draw_and_update(ctx, ui));
     }
 }
 
 pub trait AppSection {
-    fn draw_and_update(&mut self, ui: &mut Ui); // TODO: return InnerResponse
+    fn draw_and_update(&mut self, ctx: &Context, ui: &mut Ui); // TODO: return InnerResponse
 }

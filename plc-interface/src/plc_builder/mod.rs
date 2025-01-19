@@ -99,9 +99,7 @@ impl PlcBuilderInterface {
             let signed_op = match plc_op {
                 Ok(plc_op) => match signing_key {
                     None => Err(anyhow!("Missing rotation keys")),
-                    Some(SigningKey::KeyPair {
-                        secret: secret_key, ..
-                    }) => Ok(plc_op.sign(secret_key)),
+                    Some(SigningKey::KeyPair { keypair }) => Ok(plc_op.sign(&keypair.secret_key())),
                 },
                 Err(err) => Err(err),
             };

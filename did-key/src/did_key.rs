@@ -3,6 +3,8 @@ use derive_more::Into;
 use multibase::Base;
 use serde::{Deserialize, Serialize};
 
+const DID_KEY_PREFIX: &str = "did:key:";
+
 /// A String newtype representing public key bytes in the did:key:<mb-value>
 /// format.
 #[derive(Into, Serialize, Deserialize, Clone, Debug)] // TODO Fix deserialize
@@ -22,10 +24,17 @@ impl DidKey {
         );
 
         DidKey {
-            formatted_value: format!("did:key:{mb_value}"),
+            formatted_value: format!("{DID_KEY_PREFIX}{mb_value}"),
         }
     }
 
+    /// The identifier part of the key (after "did:key:")
+    pub fn multibase_value(&self) -> &str {
+        let prefix_len = DID_KEY_PREFIX.len();
+        &self.formatted_value[prefix_len..]
+    }
+
+    /// The whole "did:key:\[...\]" representation
     pub fn formatted_value(&self) -> &str {
         &self.formatted_value
     }

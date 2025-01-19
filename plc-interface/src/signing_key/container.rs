@@ -51,6 +51,35 @@ impl AppSection for SigningKeyContainer {
                 if ui.button("Load").clicked() {
                     self.is_load_modal_open = true;
                 }
+
+                let interact_rect = ui.response().interact_rect;
+                if let Some(dropped_file) = ctx.input(|i| {
+                    let Some(file) = i.raw.dropped_files.first() else {
+                        return None;
+                    };
+
+                    let Some(pos) = i.pointer.latest_pos() else {
+                        return None;
+                    };
+                    if interact_rect.contains(pos) {
+                        Some(file.clone())
+                    } else {
+                        None
+                    }
+                }) {
+                    if let Some(path) = &dropped_file.path {
+                        match SigningKey::load_keypair(path) {
+                            Ok(key) => {
+                                self.key = Some(key);
+                            }
+                            Err(err) => {
+                                error!("{err}");
+                            }
+                        }
+                    } else {
+                        error!("File path was not set");
+                    }
+                }
             }
         });
 

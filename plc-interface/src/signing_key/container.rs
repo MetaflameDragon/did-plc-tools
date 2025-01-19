@@ -1,9 +1,9 @@
-use std::fs;
 use crate::ui_helpers::emoji;
 use crate::{app::AppSection, signing_key::key::SigningKey};
 use derive_more::{Deref, DerefMut};
-use egui::{Modal, Ui};
+use egui::{Color32, Modal, Ui, Widget};
 use log::{error, info};
+use std::fs;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Default, Deref, DerefMut, Debug)]
@@ -55,29 +55,36 @@ impl AppSection for SigningKeyContainer {
         });
 
         if self.is_load_modal_open {
-
             let modal = Modal::new(egui::Id::new("Key Load Modal")).show(ctx, |ui| {
-                ui.heading("Load from file:");
-                let text_resp = ui.text_edit_singleline(&mut self.load_path_buf_str);
-                let confirm_button_resp = ui.button("Load");
+                ui.set_width(f32::min(ui.available_width(), 250.0));
+                ui.vertical_centered(|ui| {
+                    ui.heading("Load from file:");
+                    // NOTE: single-line TextEdit does not have the correct width despite clipping text
+                    // https://github.com/emilk/egui/issues/5500
+                    let text_field =
+                        egui::TextEdit::singleline(&mut self.load_path_buf_str).clip_text(true);
+                    let text_resp = text_field.ui(ui);
 
-                let user_confirmed_field = text_resp.lost_focus()
-                    && text_resp
-                        .ctx
-                        .input(|state| state.key_down(egui::Key::Enter));
-                if confirm_button_resp.clicked() || user_confirmed_field {
-                    let path = Path::new(&self.load_path_buf_str);
-                    match SigningKey::load_keypair(path) {
-                        Ok(key) => {
-                            self.key = Some(key);
-                            self.load_path_buf_str.clear();
-                            self.is_load_modal_open = false;
-                        }
-                        Err(err) => {
-                            error!("{err}");
+                    let confirm_button_resp = ui.button("Load");
+
+                    let user_confirmed_field = text_resp.lost_focus()
+                        && text_resp
+                            .ctx
+                            .input(|state| state.key_down(egui::Key::Enter));
+                    if confirm_button_resp.clicked() || user_confirmed_field {
+                        let path = Path::new(&self.load_path_buf_str);
+                        match SigningKey::load_keypair(path) {
+                            Ok(key) => {
+                                self.key = Some(key);
+                                self.load_path_buf_str.clear();
+                                self.is_load_modal_open = false;
+                            }
+                            Err(err) => {
+                                error!("{err}");
+                            }
                         }
                     }
-                }
+                });
             });
 
             if modal.should_close() {

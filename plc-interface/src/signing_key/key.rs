@@ -1,4 +1,5 @@
 use crate::app::AppSection;
+use bincode::Options;
 use did_key::DidKey;
 use egui::{RichText, Ui};
 use log::{error, info};
@@ -7,6 +8,10 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 
 impl SigningKey {
+    fn get_bincode_options() -> impl Options {
+        bincode::DefaultOptions::new().reject_trailing_bytes()
+    }
+
     pub fn generate_keypair() -> anyhow::Result<Self> {
         let global_context = secp256k1::global::SECP256K1;
         let rng = &mut secp256k1::rand::rngs::OsRng;
@@ -16,7 +21,8 @@ impl SigningKey {
 
     pub fn load_keypair(priv_bytes_path: &Path) -> anyhow::Result<Self> {
         let bytes = std::fs::read(priv_bytes_path)?;
-        let keypair = bincode::deserialize(&bytes)?;
+
+        let keypair = Self::get_bincode_options().deserialize(&bytes)?;
 
         Ok(SigningKey::KeyPair { keypair })
     }
@@ -28,7 +34,7 @@ impl SigningKey {
 
     pub fn save_keypair(&self, priv_bytes_path: &Path) -> anyhow::Result<()> {
         let bytes = match self {
-            SigningKey::KeyPair { keypair } => bincode::serialize(&keypair)?,
+            SigningKey::KeyPair { keypair } => Self::get_bincode_options().serialize(&keypair)?,
         };
 
         let mut file = std::fs::File::create_new(priv_bytes_path)?;

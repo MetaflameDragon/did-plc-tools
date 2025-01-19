@@ -10,6 +10,9 @@ members = [
     "plc-interface"
 ]
 
+[profile.dev]
+debug-assertions = true
+
 [workspace.dependencies]
 did-plc = { path = "did-plc" }
 did-key = { path = "did-key" }

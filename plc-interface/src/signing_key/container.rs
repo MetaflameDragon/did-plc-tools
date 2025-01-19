@@ -52,6 +52,7 @@ impl AppSection for SigningKeyContainer {
                     self.is_load_modal_open = true;
                 }
 
+                // Check for dropped file, set key if the cursor is hovering over this area
                 let interact_rect = ui.response().interact_rect;
                 if let Some(dropped_file) = ctx.input(|i| {
                     let Some(file) = i.raw.dropped_files.first() else {

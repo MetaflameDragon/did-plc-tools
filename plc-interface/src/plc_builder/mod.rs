@@ -7,10 +7,11 @@ use crate::signing_key::{CryptoKey, CryptoKeyContainer, SigningKeyArray};
 use anyhow::{anyhow, Context, Result};
 use did_key::DidKey;
 use did_plc::{AkaUri, PlcService, SignedPlcOperation, UnsignedPlcOperation};
-use egui::Ui;
+use egui::{RichText, Ui};
 use log::{error, info};
 use secp256k1::Keypair;
 use std::collections::HashMap;
+use std::fmt::format;
 use std::ops::Deref;
 use url::Url;
 
@@ -91,20 +92,20 @@ impl PlcBuilderInterface {
         }
 
         self.signing_key_selector
-            .ui(ctx, ui, self.rotation_keys.keys().deref().deref());
+            .ui(ctx, ui, self.rotation_keys.keys().deref());
 
         if ui.button("Sign operation").clicked() {
             let plc_op = self.get_unsigned_plc_op_genesis();
             let signing_key = self
                 .rotation_keys
                 .keys()
-                .iter()
-                .filter_map(|cont| cont.deref().as_ref())
-                .next();
+                .get(self.signing_key_selector.key_index)
+                .map(|k| k.as_ref())
+                .flatten();
 
             let signed_op = match plc_op {
                 Ok(plc_op) => match signing_key {
-                    None => Err(anyhow!("Missing rotation keys")),
+                    None => Err(anyhow!("No signing key selected")),
                     Some(signing_key) => match signing_key.keypair() {
                         None => Err(anyhow!("Signing key is not owned (no private part)")),
                         Some(keypair) => Ok(plc_op.sign(&keypair.secret_key())),
@@ -131,22 +132,43 @@ impl PlcBuilderInterface {
 
 #[derive(Default, Clone, Debug)]
 struct SigningKeySelector {
-    key_index: usize,
+    pub key_index: usize,
 }
 
 impl SigningKeySelector {
     fn ui(&mut self, _ctx: &egui::Context, ui: &mut Ui, rotation_keys: &[CryptoKeyContainer]) {
-        egui::ComboBox::from_label("Signing key").show_index(
-            ui,
-            &mut self.key_index,
-            rotation_keys.len(),
-            |i| {
-                rotation_keys
-                    .get(i)
-                    .map(|k| k.try_get_did_key())
-                    .flatten()
-                    .map_or("[none]".to_string(), |k| k.multibase_value().to_string())
-            },
-        );
+        let selected_key = rotation_keys.get(self.key_index);
+
+        let empty_key_text = RichText::new("[empty]").weak().italics();
+
+        let selected_text = {
+            match selected_key.map(|k| k.try_get_did_key()).flatten() {
+                None => empty_key_text.clone(),
+                Some(k) => {
+                    let val = k.multibase_value();
+                    let lead_char_count = 6;
+                    let tail_char_count = 3;
+                    // Show only a truncated version of the value
+                    RichText::new(format!(
+                        "{}...{}",
+                        val[..lead_char_count].to_string(),
+                        val[val.len() - tail_char_count..].to_string()
+                    ))
+                }
+            }
+        };
+
+        egui::ComboBox::from_label("Signing key")
+            .selected_text(selected_text)
+            .show_ui(ui, |ui| {
+                for (i, key_container) in rotation_keys.iter().enumerate() {
+                    let label = key_container
+                        .try_get_did_key()
+                        .map_or(empty_key_text.clone(), |k| {
+                            RichText::new(k.multibase_value())
+                        });
+                    ui.selectable_value(&mut self.key_index, i, label);
+                }
+            });
     }
 }

@@ -3,7 +3,9 @@ use p256::PublicKey;
 
 impl Multicodec for PublicKey {
     fn multicodec_bytes() -> &'static [u8] {
-        &[0x12, 0x00]
+        // https://github.com/bluesky-social/atproto/blob/5417476622ff5a97daaa00e2f57bae90dea2a22e/packages/crypto/src/const.ts#L1
+        // Not the standard byte prefix (?)
+        &[0x80, 0x24]
     }
 }
 

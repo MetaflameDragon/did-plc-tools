@@ -49,7 +49,7 @@ impl PlcService {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct PlcOperationRef(String);
+pub struct PlcOperationRef(pub String);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SignedPlcOperation {
@@ -111,15 +111,32 @@ impl UnsignedPlcOperation {
         verification_methods: HashMap<String, DidKey>,
         also_known_as: Vec<AkaUri>,
         services: HashMap<String, PlcService>,
-    ) -> Self {
-        UnsignedPlcOperation {
+    ) -> Result<Self, !> {
+        Ok(UnsignedPlcOperation {
             r#type: "plc_operation".to_string(),
             rotation_keys,
             verification_methods,
             also_known_as,
             services,
             prev: None,
-        }
+        })
+    }
+
+    pub fn new(
+        rotation_keys: Vec<DidKey>,
+        verification_methods: HashMap<String, DidKey>,
+        also_known_as: Vec<AkaUri>,
+        services: HashMap<String, PlcService>,
+        prev: Option<PlcOperationRef>
+    ) -> Result<Self, !> {
+        Ok(UnsignedPlcOperation {
+            r#type: "plc_operation".to_string(),
+            rotation_keys,
+            verification_methods,
+            also_known_as,
+            services,
+            prev,
+        })
     }
 
     pub fn sign(self, signing_key: &secp256k1::SecretKey) -> SignedPlcOperation {

@@ -6,7 +6,7 @@ use crate::plc_builder::verification_methods::VerificationMethodsInterface;
 use crate::signing_key::{CryptoKey, CryptoKeyContainer, SigningKeyArray};
 use anyhow::{anyhow, Context, Result};
 use did_key::DidKey;
-use did_plc::{AkaUri, PlcService, SignedPlcOperation, UnsignedPlcOperation};
+use did_plc::{AkaUri, PlcOperationRef, PlcService, SignedPlcOperation, UnsignedPlcOperation};
 use egui::{RichText, Ui};
 use log::{error, info};
 use secp256k1::Keypair;
@@ -26,7 +26,7 @@ pub struct PlcBuilderInterface {
     rotation_keys: RotationKeysInterface,
     verification_methods: VerificationMethodsInterface,
     services: ServicesInterface,
-    prev: Option<String>,
+    prev: String,
 
     signing_key_selector: SigningKeySelector,
 }
@@ -46,6 +46,9 @@ impl AppSection for PlcBuilderInterface {
             ui.heading("Services:");
             self.services.draw_and_update(ctx, ui);
 
+            ui.heading("Previous CID:");
+            ui.text_edit_singleline(&mut self.prev);
+
             ui.group(|ui| self.draw_action_column(ctx, ui));
         });
     }
@@ -57,8 +60,8 @@ impl PlcBuilderInterface {
         self
     }
 
-    fn get_unsigned_plc_op_genesis(&self) -> Result<UnsignedPlcOperation> {
-        Ok(UnsignedPlcOperation::new_genesis(
+    fn get_unsigned_plc_op(&self) -> Result<UnsignedPlcOperation> {
+        Ok(UnsignedPlcOperation::new(
             self.rotation_keys
                 .keys()
                 .iter()
@@ -72,13 +75,29 @@ impl PlcBuilderInterface {
             self.also_known_as
                 .get_aka_uris()
                 .context("Failed to parse AkaUris")?,
-            self.services.get_map().clone(),
-        ))
+            HashMap::from_iter(
+                self.services
+                    .get_map()
+                    .iter()
+                    .map(|(key, value)| {
+                        value
+                            .clone()
+                            .try_into()
+                            .map(|plc_service: PlcService| (key.clone(), plc_service))
+                    })
+                    .collect::<Result<Vec<_>>>()?,
+            ),
+            if !self.prev.is_empty() {
+                Some(PlcOperationRef(self.prev.clone()))
+            } else {
+                None
+            },
+        )?)
     }
 
     fn draw_action_column(&mut self, ctx: &egui::Context, ui: &mut Ui) {
         if ui.button("Print unsigned PLC Operation JSON").clicked() {
-            let plc_op = self.get_unsigned_plc_op_genesis();
+            let plc_op = self.get_unsigned_plc_op();
             match plc_op {
                 Ok(plc_op) => {
                     let json = serde_json::ser::to_string_pretty(&plc_op)
@@ -95,7 +114,7 @@ impl PlcBuilderInterface {
             .ui(ctx, ui, self.rotation_keys.keys().deref());
 
         if ui.button("Sign operation").clicked() {
-            let plc_op = self.get_unsigned_plc_op_genesis();
+            let plc_op = self.get_unsigned_plc_op();
             let signing_key = self
                 .rotation_keys
                 .keys()

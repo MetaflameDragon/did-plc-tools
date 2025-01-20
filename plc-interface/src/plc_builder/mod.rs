@@ -4,10 +4,10 @@ use crate::plc_builder::rotation_keys::RotationKeysInterface;
 use crate::plc_builder::services::ServicesInterface;
 use crate::plc_builder::verification_methods::VerificationMethodsInterface;
 use crate::signing_key::{CryptoKey, CryptoKeyContainer, SigningKeyArray};
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use did_key::DidKey;
 use did_plc::{AkaUri, PlcOperationRef, PlcService, SignedPlcOperation, UnsignedPlcOperation};
-use egui::{RichText, Ui};
+use egui::{EventFilter, RichText, Ui, ViewportCommand};
 use log::{error, info};
 use secp256k1::Keypair;
 use std::collections::HashMap;
@@ -28,12 +28,15 @@ pub struct PlcBuilderInterface {
     services: ServicesInterface,
     prev: String,
 
+    plc_json_loader: PlcJsonLoader,
     signing_key_selector: SigningKeySelector,
 }
 
 impl AppSection for PlcBuilderInterface {
     fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
         ui.vertical(|ui| {
+            self.draw_plc_loader_interface(ctx, ui);
+
             ui.heading("Also known as:");
             self.also_known_as.draw_and_update(ctx, ui);
 
@@ -55,6 +58,18 @@ impl AppSection for PlcBuilderInterface {
 }
 
 impl PlcBuilderInterface {
+    fn draw_plc_loader_interface(&mut self, ctx: &egui::Context, ui: &mut Ui) {
+        match self.plc_json_loader.ui(ctx, ui) {
+            None => {}
+            Some(Ok(plc_op)) => {
+                info!("Loading plc json: {:?}", plc_op);
+            }
+            Some(Err(e)) => {
+                error!("{:?}", e);
+            }
+        }
+    }
+
     pub fn with_atproto_pds(mut self, pds_endpoint: Url) -> Self {
         self.services.add_atproto_pds(pds_endpoint);
         self
@@ -189,5 +204,37 @@ impl SigningKeySelector {
                     ui.selectable_value(&mut self.key_index, i, label);
                 }
             });
+    }
+}
+
+#[derive(Default, Clone, Debug)]
+struct PlcJsonLoader {}
+
+impl PlcJsonLoader {
+    fn ui(&mut self, ctx: &egui::Context, ui: &mut Ui) -> Option<Result<UnsignedPlcOperation>> {
+        if ui.button("Load from clipboard (JSON)").clicked() {
+            ui.ctx().send_viewport_cmd(ViewportCommand::RequestPaste);
+            ui.response().request_focus();
+        }
+
+        if let Some(clipboard) = ui.input(|i| {
+            i.events.iter().find_map(|e| {
+                if let egui::Event::Paste(paste) = e {
+                    Some(paste.to_owned())
+                } else {
+                    None
+                }
+            })
+        }) {
+            if clipboard.is_empty() {
+                return Some(Err(anyhow!("Clipboard is empty")));
+            }
+            return Some(
+                serde_json::de::from_str(&clipboard)
+                    .context("Failed to deserialize JSON in clipboard"),
+            );
+        }
+
+        None
     }
 }

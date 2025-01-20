@@ -5,6 +5,7 @@ edition = "2021"
 
 [workspace]
 members = [
+    "crypto-traits",
     "did-key",
     "did-plc",
     "plc-interface"
@@ -16,6 +17,7 @@ debug-assertions = true
 [workspace.dependencies]
 did-plc = { path = "did-plc" }
 did-key = { path = "did-key" }
+crypto-traits = { path = "crypto-traits" }
 
 serde = "1.0"
 serde_json = "1.0.134"

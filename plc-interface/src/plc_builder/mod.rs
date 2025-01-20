@@ -3,15 +3,15 @@ use crate::plc_builder::aka::AlsoKnownAsInterface;
 use crate::plc_builder::rotation_keys::RotationKeysInterface;
 use crate::plc_builder::services::ServicesInterface;
 use crate::plc_builder::verification_methods::VerificationMethodsInterface;
-use crate::signing_key::{CryptoKey, SigningKeyArray, CryptoKeyContainer};
+use crate::signing_key::{CryptoKey, CryptoKeyContainer, SigningKeyArray};
 use anyhow::{anyhow, Context, Result};
 use did_key::DidKey;
 use did_plc::{AkaUri, PlcService, SignedPlcOperation, UnsignedPlcOperation};
 use egui::Ui;
 use log::{error, info};
+use secp256k1::Keypair;
 use std::collections::HashMap;
 use std::ops::Deref;
-use secp256k1::Keypair;
 use url::Url;
 
 mod aka;
@@ -26,6 +26,8 @@ pub struct PlcBuilderInterface {
     verification_methods: VerificationMethodsInterface,
     services: ServicesInterface,
     prev: Option<String>,
+
+    signing_key_selector: SigningKeySelector,
 }
 
 impl AppSection for PlcBuilderInterface {
@@ -43,7 +45,7 @@ impl AppSection for PlcBuilderInterface {
             ui.heading("Services:");
             self.services.draw_and_update(ctx, ui);
 
-            ui.group(|ui| self.draw_action_column(ui));
+            ui.group(|ui| self.draw_action_column(ctx, ui));
         });
     }
 }
@@ -73,7 +75,7 @@ impl PlcBuilderInterface {
         ))
     }
 
-    fn draw_action_column(&self, ui: &mut Ui) {
+    fn draw_action_column(&mut self, ctx: &egui::Context, ui: &mut Ui) {
         if ui.button("Print unsigned PLC Operation JSON").clicked() {
             let plc_op = self.get_unsigned_plc_op_genesis();
             match plc_op {
@@ -87,6 +89,9 @@ impl PlcBuilderInterface {
                 }
             }
         }
+
+        self.signing_key_selector
+            .ui(ctx, ui, self.rotation_keys.keys().deref().deref());
 
         if ui.button("Sign operation").clicked() {
             let plc_op = self.get_unsigned_plc_op_genesis();
@@ -102,7 +107,7 @@ impl PlcBuilderInterface {
                     None => Err(anyhow!("Missing rotation keys")),
                     Some(signing_key) => match signing_key.keypair() {
                         None => Err(anyhow!("Signing key is not owned (no private part)")),
-                        Some(keypair) => { Ok(plc_op.sign(&keypair.secret_key())) }
+                        Some(keypair) => Ok(plc_op.sign(&keypair.secret_key())),
                     },
                 },
                 Err(err) => Err(err),
@@ -121,5 +126,27 @@ impl PlcBuilderInterface {
                 }
             }
         }
+    }
+}
+
+#[derive(Default, Clone, Debug)]
+struct SigningKeySelector {
+    key_index: usize,
+}
+
+impl SigningKeySelector {
+    fn ui(&mut self, _ctx: &egui::Context, ui: &mut Ui, rotation_keys: &[CryptoKeyContainer]) {
+        egui::ComboBox::from_label("Signing key").show_index(
+            ui,
+            &mut self.key_index,
+            rotation_keys.len(),
+            |i| {
+                rotation_keys
+                    .get(i)
+                    .map(|k| k.try_get_did_key())
+                    .flatten()
+                    .map_or("[none]".to_string(), |k| k.multibase_value().to_string())
+            },
+        );
     }
 }

@@ -1,6 +1,7 @@
 use crate::ui_helpers::emoji;
 use crate::{app::AppSection, signing_key::key::CryptoKey};
 use derive_more::{Deref, DerefMut};
+use did_key::DidKey;
 use egui::{Color32, Modal, Ui, Widget};
 use log::{error, info};
 use std::fs;
@@ -14,6 +15,12 @@ pub struct CryptoKeyContainer {
 
     is_load_modal_open: bool,
     load_path_buf_str: String,
+}
+
+impl CryptoKeyContainer {
+    pub fn try_get_did_key(&self) -> Option<DidKey> {
+        self.key.as_ref().map(|k| k.as_did_key())
+    }
 }
 
 impl AppSection for CryptoKeyContainer {

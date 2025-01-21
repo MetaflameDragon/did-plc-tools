@@ -25,11 +25,8 @@ pub enum Error {
     #[error(r#"Missing URI protocol (at://)"#)]
     MissingAtProtocol,
 
-    // Use soft validation instead?
     #[error(r#"Invalid at:// authority (must be one of: handle, did:plc, did:web)"#)]
-    UnsupportedDid,
-    #[error(r#"Invalid at:// authority (must be one of: handle, did:plc, did:web)"#)]
-    InvalidHandle, // Use soft validation instead?
+    InvalidAuthority, // Use soft validation instead?
 }
 
 impl TryFrom<&str> for AkaUri {
@@ -50,10 +47,6 @@ impl TryFrom<String> for AkaUri {
     }
 }
 
-fn validate_handle(value: &str) -> Result<(), Error> {
-
-}
-
 fn validate(value: &str) -> Result<(), Error> {
     if !value.starts_with(AT_PREFIX) {
         return Err(Error::MissingAtProtocol);
@@ -61,9 +54,20 @@ fn validate(value: &str) -> Result<(), Error> {
 
     let authority = &value[AT_PREFIX.len()..];
 
+    // Authority must be either a valid handle, or start with one of the supported did methods
+    // TODO: better did method validation?
+    if crate::handle::validate_handle(authority).is_err()
+        && !SUPPORTED_DID_METHODS
+            .iter()
+            .any(|prefix| authority.starts_with(prefix))
+    {
+        return Err(Error::InvalidAuthority);
+    }
+
     Ok(())
 }
 
+#[cfg(test)]
 mod tests {
     use crate::aka_uri::{AkaUri, Error};
 

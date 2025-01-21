@@ -1036,6 +1036,7 @@ dependencies = [
  "base32",
  "base64",
  "chrono",
+ "crypto-traits",
  "derive_more",
  "elliptic-curve",
  "itertools",

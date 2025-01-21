@@ -10,7 +10,6 @@ serde_ipld_dagcbor = { workspace = true }
 
 sha2 = { workspace = true }
 p256 = { workspace = true }
-secp256k1 = { workspace = true, features = ["rand"] }
 k256 = "^0.13"
 elliptic-curve = "^0.13"
 crypto-traits = { workspace = true }

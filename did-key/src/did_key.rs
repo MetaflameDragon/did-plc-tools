@@ -39,8 +39,8 @@ impl From<P256PublicKey> for DidKey {
     }
 }
 
-#[derive(Error, Debug)]
-pub enum DidKeyParseError {
+#[derive(Error, Debug, Eq, PartialEq)]
+pub enum Error {
     #[error(r#"Missing "did:key:" prefix"#)]
     MissingPrefix,
     #[error("Invalid did:key multibase value")]
@@ -48,7 +48,7 @@ pub enum DidKeyParseError {
 }
 
 impl TryFrom<String> for DidKey {
-    type Error = DidKeyParseError;
+    type Error = Error;
     fn try_from(value: String) -> Result<Self, Self::Error> {
         if !value.starts_with(DID_KEY_PREFIX) {
             return Err(Self::Error::MissingPrefix);
@@ -136,5 +136,19 @@ mod tests {
             serde_json::de::from_str::<DidKey>(&did_key_str).expect("Failed to deserialize");
 
         assert_eq!(did_key_deser, did_key);
+    }
+
+    #[test]
+    fn deserialize_invalid_prefix() {
+        let invalid_str = r#""did:other:abcd""#;
+
+        let err = serde_json::de::from_str::<DidKey>(&invalid_str)
+            .expect_err("Failed to reject invalid format");
+
+        dbg!(&err);
+        println!("{err:#?}");
+
+        assert!(err.is_data());
+        // TODO: does not forward internal error enum!
     }
 }

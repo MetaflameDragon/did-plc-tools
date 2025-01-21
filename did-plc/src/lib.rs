@@ -3,35 +3,21 @@
 extern crate derive_getters;
 
 use base64::prelude::*;
+use derive_more::Into;
 use did_key::DidKey;
 use secp256k1::Message;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use std::{collections::HashMap, fmt::Display};
 use url::Url;
+use aka_uri::AkaUri;
+
+mod aka_uri;
+mod handle;
+
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Signature(String);
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AkaUri(String);
-
-impl AkaUri {
-    /// Authority must be a DID (PLC or web) or a domain
-    pub fn new_at(authority: &str) -> Self {
-        // TODO Validate
-        AkaUri(format!("at://{authority}"))
-    }
-}
-
-impl TryFrom<&str> for AkaUri {
-    type Error = !;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        // TODO Validate
-        Ok(Self(value.to_string()))
-    }
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlcService {
@@ -127,7 +113,7 @@ impl UnsignedPlcOperation {
         verification_methods: HashMap<String, DidKey>,
         also_known_as: Vec<AkaUri>,
         services: HashMap<String, PlcService>,
-        prev: Option<PlcOperationRef>
+        prev: Option<PlcOperationRef>,
     ) -> Result<Self, !> {
         Ok(UnsignedPlcOperation {
             r#type: "plc_operation".to_string(),

@@ -60,6 +60,10 @@ impl TryFrom<String> for DidKey {
     }
 }
 
+/// Creates a did:key using a multicodec prefix + key bytes.
+/// The key is composed of a prefix (did:key:) and the Base58Btc-encoded value of those bytes.
+///
+/// Described [here](https://w3c-ccg.github.io/did-method-key/#format).
 fn make_did_key(multicodec_prefix: &[u8], key_bytes: &[u8]) -> DidKey {
     let mb_value = multibase::encode(
         Base::Base58Btc,
@@ -92,8 +96,8 @@ impl DidKey {
 
 #[cfg(test)]
 mod tests {
-    use elliptic_curve::ScalarPrimitive;
     use crate::did_key::DidKey;
+    use elliptic_curve::ScalarPrimitive;
 
     fn gen_did_key() -> DidKey {
         let secret_key = k256::SecretKey::new(ScalarPrimitive::from(1));

@@ -1044,7 +1044,6 @@ dependencies = [
  "multibase",
  "p256",
  "rand",
- "secp256k1",
  "serde",
  "serde_ipld_dagcbor",
  "serde_json",

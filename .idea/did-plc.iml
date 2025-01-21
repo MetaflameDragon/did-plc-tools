@@ -11,6 +11,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/did-key/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/did-plc/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crypto-traits/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/plc-interface/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>

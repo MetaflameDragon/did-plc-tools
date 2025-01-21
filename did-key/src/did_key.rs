@@ -4,16 +4,18 @@ use k256::PublicKey as Secp256k1PublicKey;
 use multibase::Base;
 use p256::PublicKey as P256PublicKey;
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 // prevent accidental ambiguous use of PublicKey
+#[allow(unused)]
 type PublicKey = !;
 
 const DID_KEY_PREFIX: &str = "did:key:";
 
 /// A String newtype representing public key bytes in the did:key:<mb-value>
 /// format.
-#[derive(Into, Serialize, Deserialize, Clone, Debug)] // TODO Fix deserialize
-#[serde(into = "String")]
+#[derive(Into, Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
+#[serde(into = "String", try_from = "String")]
 pub struct DidKey {
     #[into]
     formatted_value: String,
@@ -34,6 +36,27 @@ impl From<P256PublicKey> for DidKey {
         let key_bytes = public_key.to_sec1_bytes();
 
         make_did_key(&multicodec_prefix, &key_bytes)
+    }
+}
+
+#[derive(Error, Debug)]
+pub enum DidKeyParseError {
+    #[error(r#"Missing "did:key:" prefix"#)]
+    MissingPrefix,
+    #[error("Invalid did:key multibase value")]
+    InvalidValue,
+}
+
+impl TryFrom<String> for DidKey {
+    type Error = DidKeyParseError;
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        if !value.starts_with(DID_KEY_PREFIX) {
+            return Err(Self::Error::MissingPrefix);
+        }
+        // TODO: Verify value
+        Ok(DidKey {
+            formatted_value: value,
+        })
     }
 }
 
@@ -69,14 +92,14 @@ impl DidKey {
 
 #[cfg(test)]
 mod tests {
+    use elliptic_curve::ScalarPrimitive;
     use crate::did_key::DidKey;
-    use rand::rngs::mock::StepRng;
 
     fn gen_did_key() -> DidKey {
-        let mut rng = StepRng::new(2, 1);
-        let (_secret_key, public_key) = secp256k1::generate_keypair(&mut rng);
+        let secret_key = k256::SecretKey::new(ScalarPrimitive::from(1));
+        let public_key = secret_key.public_key();
 
-        let did_key = DidKey::from_public_key(&public_key);
+        let did_key = public_key.into();
         did_key
     }
 
@@ -86,7 +109,7 @@ mod tests {
 
         assert_eq!(
             did_key.formatted_value(),
-            "did:key:zQ3shtkBf66Yd4GgTkAdgJ7Tge3Wj1w7Xbi6q1TiUG6BXmKVr"
+            "did:key:zQ3shVc2UkAfJCdc1TR8E66J85h48P43r93q8jGPkPpjF9Ef9"
         );
     }
 
@@ -96,7 +119,18 @@ mod tests {
 
         assert_eq!(
             serde_json::to_string_pretty(&did_key).unwrap(),
-            r#""did:key:zQ3shtkBf66Yd4GgTkAdgJ7Tge3Wj1w7Xbi6q1TiUG6BXmKVr""#
+            r#""did:key:zQ3shVc2UkAfJCdc1TR8E66J85h48P43r93q8jGPkPpjF9Ef9""#
         );
+    }
+
+    #[test]
+    fn deserialize_key() {
+        let did_key = gen_did_key();
+        let did_key_str = serde_json::to_string(&did_key).unwrap();
+
+        let did_key_deser =
+            serde_json::de::from_str::<DidKey>(&did_key_str).expect("Failed to deserialize");
+
+        assert_eq!(did_key_deser, did_key);
     }
 }

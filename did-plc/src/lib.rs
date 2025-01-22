@@ -1,23 +1,25 @@
 #![feature(never_type)]
+use ecdsa::{Signature, SignatureEncoding, SigningKey};
 #[macro_use]
 extern crate derive_getters;
 
+use aka_uri::AkaUri;
 use base64::prelude::*;
+use crypto_traits::MulticodecPrefix;
 use derive_more::Into;
 use did_key::DidKey;
-use secp256k1::Message;
+use ecdsa::signature::Signer;
+use elliptic_curve::{CurveArithmetic, PrimeCurve, PublicKey, SecretKey};
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use std::{collections::HashMap, fmt::Display};
 use url::Url;
-use aka_uri::AkaUri;
 
-mod aka_uri;
-mod handle;
-
+pub mod aka_uri;
+pub mod handle;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Signature(String);
+pub struct SignatureBase64Url(String);
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlcService {
@@ -34,28 +36,40 @@ impl PlcService {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+// TODO: Use CID
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PlcOperationRef(pub String);
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SignedPlcOperation {
     #[serde(flatten)]
     inner: UnsignedPlcOperation,
-    sig: Signature,
+    sig: SignatureBase64Url,
 }
 
+pub trait PlcBlessedKeyType {}
+
+impl PlcBlessedKeyType for p256::NistP256 {}
+impl PlcBlessedKeyType for k256::Secp256k1 {}
+
 impl SignedPlcOperation {
-    pub fn new(unsigned_op: UnsignedPlcOperation, signing_key: &secp256k1::SecretKey) -> Self {
+    pub fn new<S, C>(unsigned_op: UnsignedPlcOperation, signing_key: &S) -> Self
+    where
+        // Curve C must be "blessed" (allowed by spec), and Signing key S must sign with curve C
+        C: PlcBlessedKeyType,
+        C: PrimeCurve + CurveArithmetic,
+        S: Signer<Signature<C>>,
+        Signature<C>: SignatureEncoding,
+    {
         let unsigned_op_serialized = serde_ipld_dagcbor::ser::to_vec(&unsigned_op)
             .expect("Unsigned operation serialization failed");
-        let message =
-            Message::from_digest(sha2::Sha256::digest(unsigned_op_serialized.as_slice()).0);
-        let signature = signing_key.sign_ecdsa(message);
-        let signature_base64url = BASE64_URL_SAFE.encode(signature.serialize_compact());
+
+        let signature: Signature<_> = Signer::sign(signing_key, &unsigned_op_serialized);
+        let signature_base64url = BASE64_URL_SAFE.encode(signature.to_bytes().as_ref());
 
         SignedPlcOperation {
             inner: unsigned_op,
-            sig: Signature(signature_base64url),
+            sig: SignatureBase64Url(signature_base64url),
         }
     }
 
@@ -65,7 +79,7 @@ impl SignedPlcOperation {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UnsignedPlcOperation {
     // Fixed value "plc_operation"
     r#type: String,
@@ -98,14 +112,13 @@ impl UnsignedPlcOperation {
         also_known_as: Vec<AkaUri>,
         services: HashMap<String, PlcService>,
     ) -> Result<Self, !> {
-        Ok(UnsignedPlcOperation {
-            r#type: "plc_operation".to_string(),
+        Self::new(
             rotation_keys,
             verification_methods,
             also_known_as,
             services,
-            prev: None,
-        })
+            None,
+        )
     }
 
     pub fn new(
@@ -125,7 +138,13 @@ impl UnsignedPlcOperation {
         })
     }
 
-    pub fn sign(self, signing_key: &secp256k1::SecretKey) -> SignedPlcOperation {
+    pub fn sign<S, C>(self, signing_key: &S) -> SignedPlcOperation
+    where
+        C: PlcBlessedKeyType,
+        C: PrimeCurve + CurveArithmetic,
+        S: Signer<Signature<C>>,
+        Signature<C>: SignatureEncoding,
+    {
         SignedPlcOperation::new(self, signing_key)
     }
 

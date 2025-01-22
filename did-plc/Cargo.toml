@@ -11,8 +11,11 @@ serde_json = { workspace = true }
 serde_ipld_dagcbor = { workspace = true }
 
 sha2 = { workspace = true }
-p256 = { workspace = true }
-secp256k1 = { workspace = true }
+p256 = { workspace = true, features = ["ecdsa"] }
+k256 = { version = "0.13", features = ["ecdsa"] }
+elliptic-curve = "^0.13"
+crypto-traits = { workspace = true }
+ecdsa = { version = "^0.16", features = ["signing", "verifying"] }
 
 multibase = { workspace = true }
 base64 = { workspace = true }
@@ -24,3 +27,4 @@ thiserror = { workspace = true }
 derive_more = { workspace = true }
 derive-getters = { version = "0.5.0", features = ["auto_copy_getters"] }
 regex = "1.11.1"
+rand = "0.8.5"

@@ -1,7 +1,10 @@
 use base64::prelude::*;
-use did_key::{self, DidKey};
-use did_plc::aka_uri::AkaUri;
-use did_plc::{DidPlc, PlcService, SignedPlcOperation, UnsignedPlcOperation};
+use did_key::{self};
+use did_plc::AkaUri;
+use did_plc::DidPlc;
+use did_plc::PlcService;
+use did_plc::SignedPlcOperation;
+use did_plc::UnsignedPlcOperation;
 use ecdsa::signature::Signer;
 use ecdsa::SigningKey;
 use k256::Secp256k1;
@@ -40,7 +43,8 @@ fn main() {
             "atproto_pds".to_string(),
             PlcService::new_atproto_pds(endpoint),
         )]),
-    ).unwrap();
+    )
+    .unwrap();
 
     dbg!(&unsigned_op);
 

@@ -1,7 +1,9 @@
 use crate::app::AppSection;
-use crate::signing_key::{CryptoKey, CryptoKeyContainer};
+use crate::signing_key::{CryptoKeyContainer};
 use derive_more::{Deref, DerefMut};
 use egui::Ui;
+
+type CryptoKey = (); // TODO
 
 #[derive(Deref, DerefMut, Clone, Debug)]
 pub struct SigningKeyArray<const N: usize> {

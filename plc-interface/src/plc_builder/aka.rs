@@ -3,6 +3,7 @@ use anyhow::Context;
 use anyhow::Result;
 use did_plc::AkaUri;
 use egui::Ui;
+use itertools::Itertools;
 
 #[derive(Debug, Default, Clone)]
 pub struct AlsoKnownAsInterface {
@@ -21,5 +22,12 @@ impl AlsoKnownAsInterface {
             .lines()
             .map(|line| TryInto::<AkaUri>::try_into(line).context("Failed to parse line as AkaUri"))
             .collect()
+    }
+
+    pub fn set_aka_uris(&mut self, aka_uris: &[AkaUri]) -> Result<()> {
+        // TODO
+        // self.entries_multiline = aka_uris.iter().map(|uri| uri.into()).join("\n");
+
+        Ok(())
     }
 }

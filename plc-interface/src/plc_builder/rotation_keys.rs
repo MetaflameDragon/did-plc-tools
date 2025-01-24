@@ -17,4 +17,9 @@ impl RotationKeysInterface {
     pub fn keys(&self) -> &SigningKeyArray<5> {
         &self.rotation_keys
     }
+    pub fn keys_mut(&mut self) -> &SigningKeyArray<5> {
+        &self.rotation_keys
+    }
+
+    pub fn set_keys(&mut self, keys: SigningKeyArray<5>) {}
 }

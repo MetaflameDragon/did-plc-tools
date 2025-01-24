@@ -1,29 +1,55 @@
+use crate::app::key_store::KeyStoreInterface;
 use crate::plc_builder::PlcBuilderInterface;
 use ::core::default::Default;
-use eframe::Frame;
+use eframe::{Frame, Storage};
 use egui::{Context, Ui};
 use std::str::FromStr;
 use url::Url;
 
-#[derive(Default)]
+mod key_store;
+
 pub struct App {
+    key_store: KeyStoreInterface,
     plc_builder: PlcBuilderInterface,
 }
 
 impl App {
-    pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
+    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let pds_endpoint = Url::from_str("https://scalytooth.metaflame.dev")
             .expect("Failed to parse PDS endpoint URL");
+        let storage = cc.storage;
+
         App {
+            key_store: init_key_store(storage),
             plc_builder: PlcBuilderInterface::default().with_atproto_pds(pds_endpoint),
-            ..Default::default()
         }
     }
 }
 
+fn init_key_store(storage: Option<&dyn Storage>) -> KeyStoreInterface {
+    fn get_key_store_dir(storage: Option<&dyn Storage>) -> Option<String> {
+        Some(match storage?.get_string("key_store_dir") {
+            Some(value) => value,
+            None => {
+                let mut path = std::env::current_dir().ok()?;
+                path.push(".key_store");
+                path.to_str()?.to_owned()
+            }
+        })
+    }
+
+    KeyStoreInterface::new(get_key_store_dir(storage).unwrap_or("".to_owned()))
+}
+
 impl eframe::App for App {
     fn update(&mut self, ctx: &Context, frame: &mut Frame) {
-        egui::panel::CentralPanel::default().show(ctx, |ui| self.plc_builder.draw_and_update(ctx, ui));
+        egui::panel::CentralPanel::default().show(ctx, |ui| {
+            ui.group(|ui| {
+                ui.heading("Key Store");
+                self.key_store.ui(ui);
+            });
+            self.plc_builder.draw_and_update(ctx, ui)
+        });
     }
 }
 

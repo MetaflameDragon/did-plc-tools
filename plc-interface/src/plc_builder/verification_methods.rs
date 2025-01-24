@@ -1,10 +1,12 @@
 use crate::app::AppSection;
-use crate::signing_key::{CryptoKey, CryptoKeyContainer};
+use crate::signing_key::{CryptoKeyContainer};
 use crate::ui_helpers::hash_map::HashMapRenderer;
 use anyhow::{bail, Result};
 use egui::{RichText, TextBuffer, Ui};
 use log::error;
 use std::collections::HashMap;
+
+type CryptoKey = (); // TODO
 
 #[derive(Default, Clone, Debug)]
 pub struct VerificationMethodsInterface {
@@ -33,7 +35,7 @@ impl InputFields {
 
 impl AppSection for VerificationMethodsInterface {
     fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
-        self.map_renderer.draw_and_update(ctx, ui);
+        // self.map_renderer.draw_and_update(ctx, ui); // TODO
         self.draw_input_field(ctx, ui);
     }
 }
@@ -63,5 +65,9 @@ impl VerificationMethodsInterface {
                 }
             }
         });
+    }
+
+    pub fn set_map(&mut self, map: HashMap<String, CryptoKey>) {
+        *self.map_renderer.inner_mut() = map;
     }
 }

@@ -3,17 +3,22 @@ use crate::plc_builder::aka::AlsoKnownAsInterface;
 use crate::plc_builder::rotation_keys::RotationKeysInterface;
 use crate::plc_builder::services::ServicesInterface;
 use crate::plc_builder::verification_methods::VerificationMethodsInterface;
-use crate::signing_key::{CryptoKey, CryptoKeyContainer, SigningKeyArray};
+use crate::signing_key::{CryptoKeyContainer, SigningKeyArray};
 use anyhow::{anyhow, bail, Context, Result};
 use did_key::DidKey;
-use did_plc::{AkaUri, PlcOperationRef, PlcService, SignedPlcOperation, UnsignedPlcOperation};
-use egui::{EventFilter, RichText, Ui, ViewportCommand};
+use did_plc::AkaUri;
+use did_plc::PlcOperationRef;
+use did_plc::PlcService;
+use did_plc::SignedPlcOperation;
+use did_plc::UnsignedPlcOperation;
+use egui::{Button, EventFilter, RichText, Ui, ViewportCommand};
 use log::{error, info};
-use secp256k1::Keypair;
 use std::collections::HashMap;
 use std::fmt::format;
 use std::ops::Deref;
 use url::Url;
+
+type CryptoKey = (); // TODO
 
 mod aka;
 mod rotation_keys;
@@ -77,16 +82,18 @@ impl PlcBuilderInterface {
 
     fn get_unsigned_plc_op(&self) -> Result<UnsignedPlcOperation> {
         Ok(UnsignedPlcOperation::new(
-            self.rotation_keys
-                .keys()
-                .iter()
-                .filter_map(|k| k.as_ref().map(|k| k.as_did_key()))
-                .collect(),
-            self.verification_methods
-                .get_map()
-                .iter()
-                .map(|(key, value)| (key.clone(), value.as_did_key()))
-                .collect(),
+            // self.rotation_keys
+            //     .keys()
+            //     .iter()
+            //     .filter_map(|k| k.as_ref().map(|k| k.as_did_key()))
+            //     .collect(),
+            todo!(),
+            // self.verification_methods
+            //     .get_map()
+            //     .iter()
+            //     .map(|(key, value)| (key.clone(), value.as_did_key()))
+            //     .collect(),
+            todo!(),
             self.also_known_as
                 .get_aka_uris()
                 .context("Failed to parse AkaUris")?,
@@ -137,30 +144,43 @@ impl PlcBuilderInterface {
                 .map(|k| k.as_ref())
                 .flatten();
 
-            let signed_op = match plc_op {
+            let signed_op: Result<(), _> = match plc_op {
                 Ok(plc_op) => match signing_key {
                     None => Err(anyhow!("No signing key selected")),
-                    Some(signing_key) => match signing_key.keypair() {
-                        None => Err(anyhow!("Signing key is not owned (no private part)")),
-                        Some(keypair) => Ok(plc_op.sign(&keypair.secret_key())),
-                    },
+                    Some(signing_key) => {
+                        todo!()
+                        // match signing_key.keypair() {
+                        //     None => Err(anyhow!("Signing key is not owned (no private part)")),
+                        //     Some(keypair) => Ok(plc_op.sign(&keypair.secret_key())),
+                        // }
+                    }
                 },
                 Err(err) => Err(err),
             };
 
             match signed_op {
                 Ok(signed_op) => {
-                    let did_plc = signed_op.get_did_plc();
-                    let json = serde_json::ser::to_string_pretty(&signed_op)
-                        .unwrap_or("Failed to serialize signed plc operation".to_string());
-                    info!("{json}");
-                    info!("{did_plc}");
+                    todo!()
+                    // let did_plc = signed_op.get_did_plc();
+                    // let json = serde_json::ser::to_string_pretty(&signed_op)
+                    //     .unwrap_or("Failed to serialize signed plc operation".to_string());
+                    // info!("{json}");
+                    // info!("{did_plc}");
                 }
                 Err(err) => {
                     error!("{err}");
                 }
             }
         }
+    }
+
+    fn load_from_plc_op(&mut self, plc_op: UnsignedPlcOperation) -> Result<()> {
+        todo!()
+        // self.also_known_as.set_aka_uris(plc_op.also_known_as())?;
+        // let rotation_keys = plc_op.rotation_keys().iter().map(|did_key|);
+        // self.rotation_keys.set_keys(rotation_keys);
+        // self.verification_methods
+        // Ok(())
     }
 }
 
@@ -175,35 +195,36 @@ impl SigningKeySelector {
 
         let empty_key_text = RichText::new("[empty]").weak().italics();
 
-        let selected_text = {
-            match selected_key.map(|k| k.try_get_did_key()).flatten() {
-                None => empty_key_text.clone(),
-                Some(k) => {
-                    let val = k.multibase_value();
-                    let lead_char_count = 6;
-                    let tail_char_count = 3;
-                    // Show only a truncated version of the value
-                    RichText::new(format!(
-                        "{}...{}",
-                        val[..lead_char_count].to_string(),
-                        val[val.len() - tail_char_count..].to_string()
-                    ))
-                }
-            }
-        };
-
-        egui::ComboBox::from_label("Signing key")
-            .selected_text(selected_text)
-            .show_ui(ui, |ui| {
-                for (i, key_container) in rotation_keys.iter().enumerate() {
-                    let label = key_container
-                        .try_get_did_key()
-                        .map_or(empty_key_text.clone(), |k| {
-                            RichText::new(k.multibase_value())
-                        });
-                    ui.selectable_value(&mut self.key_index, i, label);
-                }
-            });
+        // TODO
+        // let selected_text = {
+        //     match selected_key.map(|k| k.try_get_did_key()).flatten() {
+        //         None => empty_key_text.clone(),
+        //         Some(k) => {
+        //             let val = k.multibase_value();
+        //             let lead_char_count = 6;
+        //             let tail_char_count = 3;
+        //             // Show only a truncated version of the value
+        //             RichText::new(format!(
+        //                 "{}...{}",
+        //                 val[..lead_char_count].to_string(),
+        //                 val[val.len() - tail_char_count..].to_string()
+        //             ))
+        //         }
+        //     }
+        // };
+        //
+        // egui::ComboBox::from_label("Signing key")
+        //     .selected_text(selected_text)
+        //     .show_ui(ui, |ui| {
+        //         for (i, key_container) in rotation_keys.iter().enumerate() {
+        //             let label = key_container
+        //                 .try_get_did_key()
+        //                 .map_or(empty_key_text.clone(), |k| {
+        //                     RichText::new(k.multibase_value())
+        //                 });
+        //             ui.selectable_value(&mut self.key_index, i, label);
+        //         }
+        //     });
     }
 }
 

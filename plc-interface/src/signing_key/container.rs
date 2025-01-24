@@ -1,5 +1,5 @@
 use crate::ui_helpers::emoji;
-use crate::{app::AppSection, signing_key::key::CryptoKey};
+use crate::{app::AppSection};
 use derive_more::{Deref, DerefMut};
 use did_key::DidKey;
 use egui::{Color32, Modal, Ui, Widget};
@@ -7,11 +7,13 @@ use log::{error, info};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+type CryptoKey = (); // TODO
+
 #[derive(Clone, Default, Deref, DerefMut, Debug)]
 pub struct CryptoKeyContainer {
     #[deref]
     #[deref_mut]
-    key: Option<CryptoKey>,
+    key: Option<()>, // TODO
 
     is_load_modal_open: bool,
     load_path_buf_str: String,
@@ -19,7 +21,8 @@ pub struct CryptoKeyContainer {
 
 impl CryptoKeyContainer {
     pub fn try_get_did_key(&self) -> Option<DidKey> {
-        self.key.as_ref().map(|k| k.as_did_key())
+        todo!()
+        // self.key.as_ref().map(|k| k.as_did_key())
     }
 }
 
@@ -34,26 +37,26 @@ impl AppSection for CryptoKeyContainer {
                         self.key = None;
                     }
                     Some(DrawKeyResponse::SaveKey) => {
-                        let did_key = key.as_did_key();
-                        let did_key_name = did_key.formatted_value().replace(":", "_");
-                        let path = format!("{did_key_name}.secp256k1.priv");
-                        let path = PathBuf::from(path);
-
-                        let result = key.save_keypair(&path);
-                        match result {
-                            Ok(()) => {
-                                info!("Key saved to {}", path.display());
-                            }
-                            Err(err) => {
-                                error!("{err}");
-                            }
-                        }
+                        let did_key = /*key.as_did_key()*/ todo!();
+                        // let did_key_name = did_key.formatted_value().replace(":", "_");
+                        // let path = format!("{did_key_name}.secp256k1.priv");
+                        // let path = PathBuf::from(path);
+                        //
+                        // let result = key.save_keypair(&path);
+                        // match result {
+                        //     Ok(()) => {
+                        //         info!("Key saved to {}", path.display());
+                        //     }
+                        //     Err(err) => {
+                        //         error!("{err}");
+                        //     }
+                        // }
                     }
                 }
             } else {
                 // Draw key generation options
                 if ui.button("New").clicked() {
-                    self.key = CryptoKey::generate_keypair().ok();
+                    // self.key = CryptoKey::generate_keypair().ok(); // TODO
                 }
                 if ui.button("Load").clicked() {
                     self.is_load_modal_open = true;
@@ -76,14 +79,14 @@ impl AppSection for CryptoKeyContainer {
                     }
                 }) {
                     if let Some(path) = &dropped_file.path {
-                        match CryptoKey::load_keypair(path) {
-                            Ok(key) => {
-                                self.key = Some(key);
-                            }
-                            Err(err) => {
-                                error!("{err}");
-                            }
-                        }
+                        // match CryptoKey::load_keypair(path) { // TODO
+                        //     Ok(key) => {
+                        //         self.key = Some(key);
+                        //     }
+                        //     Err(err) => {
+                        //         error!("{err}");
+                        //     }
+                        // }
                     } else {
                         error!("File path was not set");
                     }
@@ -110,16 +113,16 @@ impl AppSection for CryptoKeyContainer {
                             .input(|state| state.key_down(egui::Key::Enter));
                     if confirm_button_resp.clicked() || user_confirmed_field {
                         let path = Path::new(&self.load_path_buf_str);
-                        match CryptoKey::load_keypair(path) {
-                            Ok(key) => {
-                                self.key = Some(key);
-                                self.load_path_buf_str.clear();
-                                self.is_load_modal_open = false;
-                            }
-                            Err(err) => {
-                                error!("{err}");
-                            }
-                        }
+                        // match CryptoKey::load_keypair(path) { // TODO
+                        //     Ok(key) => {
+                        //         self.key = Some(key);
+                        //         self.load_path_buf_str.clear();
+                        //         self.is_load_modal_open = false;
+                        //     }
+                        //     Err(err) => {
+                        //         error!("{err}");
+                        //     }
+                        // }
                     }
                 });
             });
@@ -150,7 +153,8 @@ fn draw_contained_key(
         return Some(DrawKeyResponse::SaveKey);
     }
 
-    key.draw_and_update(ctx, ui);
+    // TODO
+    // key.draw_and_update(ctx, ui);
 
     None
 }

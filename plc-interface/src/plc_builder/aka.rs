@@ -3,7 +3,6 @@ use anyhow::Context;
 use anyhow::Result;
 use did_plc::AkaUri;
 use egui::Ui;
-use itertools::Itertools;
 
 #[derive(Debug, Default, Clone)]
 pub struct AlsoKnownAsInterface {

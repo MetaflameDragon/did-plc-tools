@@ -3,18 +3,14 @@ use crate::plc_builder::aka::AlsoKnownAsInterface;
 use crate::plc_builder::rotation_keys::RotationKeysInterface;
 use crate::plc_builder::services::ServicesInterface;
 use crate::plc_builder::verification_methods::VerificationMethodsInterface;
-use crate::signing_key::{CryptoKeyContainer, SigningKeyArray};
-use anyhow::{anyhow, bail, Context, Result};
-use did_key::DidKey;
-use did_plc::AkaUri;
+use crate::signing_key::CryptoKeyContainer;
+use anyhow::{anyhow, Context, Result};
 use did_plc::PlcOperationRef;
 use did_plc::PlcService;
-use did_plc::SignedPlcOperation;
 use did_plc::UnsignedPlcOperation;
-use egui::{Button, EventFilter, RichText, Ui, ViewportCommand};
+use egui::{RichText, Ui, ViewportCommand};
 use log::{error, info};
 use std::collections::HashMap;
-use std::fmt::format;
 use std::ops::Deref;
 use url::Url;
 
@@ -141,8 +137,7 @@ impl PlcBuilderInterface {
                 .rotation_keys
                 .keys()
                 .get(self.signing_key_selector.key_index)
-                .map(|k| k.as_ref())
-                .flatten();
+                .and_then(|k| k.as_ref());
 
             let signed_op: Result<(), _> = match plc_op {
                 Ok(plc_op) => match signing_key {

@@ -2,7 +2,7 @@ use crate::app::AppSection;
 use crate::signing_key::CryptoKeyContainer;
 use crate::ui_helpers::hash_map::HashMapRenderer;
 use anyhow::{bail, Result};
-use egui::{RichText, TextBuffer, Ui};
+use egui::{TextBuffer, Ui};
 use log::error;
 use std::collections::HashMap;
 

@@ -1,10 +1,8 @@
 use derive_new::new;
-use did_key::DidKey;
 use did_plc::{PlcBlessedSigningKey, PlcBlessedSigningKeyBox};
 use ecdsa::SigningKey;
 use egui::{RichText, Ui};
 use k256::Secp256k1;
-use std::hash::Hash;
 use std::iter;
 use std::path::PathBuf;
 

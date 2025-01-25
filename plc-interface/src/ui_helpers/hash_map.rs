@@ -2,7 +2,6 @@ use crate::app::AppSection;
 use derive_more::{Deref, DerefMut, Into};
 use egui::{Button, RichText, Ui, Widget};
 use std::collections::HashMap;
-use std::fmt::Display;
 use std::hash::Hash;
 
 #[derive(Clone, Debug, Deref, DerefMut, Into)]
@@ -70,9 +69,9 @@ where
                 } else {
                     let mut key_to_remove = None;
 
-                    for (key, mut value) in &mut *map {
+                    for (key, value) in &mut *map {
                         let should_remove =
-                            Self::draw_item(&key.to_string(), &mut value, allow_removing, ctx, ui);
+                            Self::draw_item(&key.to_string(), value, allow_removing, ctx, ui);
                         if should_remove {
                             key_to_remove = Some(key.clone());
                         }
@@ -102,7 +101,7 @@ where
                     let resp = remove_button.ui(ui);
                     should_remove = resp.clicked();
                 }
-                ui.label(&*key);
+                ui.label(key);
             });
             value.draw_and_update(ctx, ui);
         });

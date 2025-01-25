@@ -3,8 +3,6 @@ use ecdsa::{Signature, SignatureEncoding, SigningKey};
 #[macro_use]
 extern crate derive_getters;
 
-use base64::prelude::*;
-use crypto_traits::MulticodecPrefix;
 use derive_more::{Deref, DerefMut, From, Into};
 use ecdsa::hazmat::SignPrimitive;
 use ecdsa::signature::digest::generic_array::ArrayLength;
@@ -13,9 +11,7 @@ use ecdsa::signature::Signer;
 use elliptic_curve::{CurveArithmetic, PrimeCurve, PublicKey};
 use k256::Secp256k1;
 use p256::NistP256;
-use serde::{Deserialize, Serialize};
 use sha2::Digest;
-use std::fmt::Display;
 use std::ops::Add;
 
 mod aka_uri;

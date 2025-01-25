@@ -1,16 +1,12 @@
-use base64::prelude::*;
-use did_key::{self};
 use did_plc::AkaUri;
 use did_plc::DidPlc;
 use did_plc::PlcService;
 use did_plc::SignedPlcOperation;
 use did_plc::UnsignedPlcOperation;
-use ecdsa::signature::Signer;
 use ecdsa::SigningKey;
 use k256::Secp256k1;
-use serde::{Serialize, Serializer};
 use sha2::Digest;
-use std::{collections::HashMap, fmt::Pointer, io::Write, iter};
+use std::{collections::HashMap, iter};
 use url::Url;
 
 mod helpers;

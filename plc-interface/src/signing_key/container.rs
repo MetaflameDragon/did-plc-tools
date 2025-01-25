@@ -36,6 +36,7 @@ impl AppSection for CryptoKeyContainer {
                     Some(DrawKeyResponse::DeleteKey) => {
                         self.key = None;
                     }
+                    #[allow(unreachable_code)]
                     Some(DrawKeyResponse::SaveKey) => {
                         let did_key = /*key.as_did_key()*/ todo!();
                         // let did_key_name = did_key.formatted_value().replace(":", "_");

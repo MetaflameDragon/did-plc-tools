@@ -100,8 +100,7 @@ mod tests {
         let secret_key = k256::SecretKey::new(ScalarPrimitive::from(1));
         let public_key = secret_key.public_key();
 
-        let did_key = public_key.into();
-        did_key
+        public_key.into()
     }
 
     #[test]
@@ -139,7 +138,7 @@ mod tests {
     fn deserialize_invalid_prefix() {
         let invalid_str = r#""did:other:abcd""#;
 
-        let err = serde_json::de::from_str::<DidKey>(&invalid_str)
+        let err = serde_json::de::from_str::<DidKey>(invalid_str)
             .expect_err("Failed to reject invalid format");
 
         dbg!(&err);

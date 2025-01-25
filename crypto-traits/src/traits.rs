@@ -12,6 +12,6 @@ pub trait MulticodecPrefix {
     fn multicodec_prefix_unsigned_varint() -> Vec<u8> {
         let mut buf = unsigned_varint::encode::u64_buffer();
         let out_buf = unsigned_varint::encode::u64(Self::multicodec_prefix_raw(), &mut buf);
-        out_buf.iter().copied().collect()
+        out_buf.to_vec()
     }
 }

@@ -1,12 +1,13 @@
-use crate::did_plc::DidPlc;
-use crate::operation::unsigned::UnsignedPlcOperation;
-use crate::PlcBlessedKeyCurve;
 use base64::engine::general_purpose::URL_SAFE as BASE64_URL_SAFE;
 use base64::Engine;
 use ecdsa::signature::Signer;
 use ecdsa::{Signature, SignatureEncoding};
 use elliptic_curve::{CurveArithmetic, PrimeCurve};
 use serde::{Deserialize, Serialize};
+
+use crate::did_plc::DidPlc;
+use crate::operation::unsigned::UnsignedPlcOperation;
+use crate::PlcBlessedKeyCurve;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SignedPlcOperation {

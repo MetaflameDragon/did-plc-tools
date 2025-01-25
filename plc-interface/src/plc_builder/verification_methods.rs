@@ -1,10 +1,12 @@
-use crate::app::AppSection;
-use crate::signing_key::CryptoKeyContainer;
-use crate::ui_helpers::hash_map::HashMapRenderer;
+use std::collections::HashMap;
+
 use anyhow::{bail, Result};
 use egui::{TextBuffer, Ui};
 use log::error;
-use std::collections::HashMap;
+
+use crate::app::AppSection;
+use crate::signing_key::CryptoKeyContainer;
+use crate::ui_helpers::hash_map::HashMapRenderer;
 
 type CryptoKey = (); // TODO
 

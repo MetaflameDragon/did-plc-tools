@@ -1,11 +1,13 @@
-use crate::app::AppSection;
-use crate::ui_helpers::emoji;
+use std::fs;
+use std::path::{Path, PathBuf};
+
 use derive_more::{Deref, DerefMut};
 use did_key::DidKey;
 use egui::{Color32, Modal, Ui, Widget};
 use log::{error, info};
-use std::fs;
-use std::path::{Path, PathBuf};
+
+use crate::app::AppSection;
+use crate::ui_helpers::emoji;
 
 type CryptoKey = (); // TODO
 

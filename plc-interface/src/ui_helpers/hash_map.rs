@@ -1,8 +1,10 @@
-use crate::app::AppSection;
-use derive_more::{Deref, DerefMut, Into};
-use egui::{Button, RichText, Ui, Widget};
 use std::collections::HashMap;
 use std::hash::Hash;
+
+use derive_more::{Deref, DerefMut, Into};
+use egui::{Button, RichText, Ui, Widget};
+
+use crate::app::AppSection;
 
 #[derive(Clone, Debug, Deref, DerefMut, Into)]
 pub struct HashMapRenderer<K, V> {

@@ -1,6 +1,7 @@
+use egui::Ui;
+
 use crate::app::AppSection;
 use crate::signing_key::SigningKeyArray;
-use egui::Ui;
 
 #[derive(Default, Clone, Debug)]
 pub struct RotationKeysInterface {

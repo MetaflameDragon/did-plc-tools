@@ -93,8 +93,9 @@ impl DidKey {
 
 #[cfg(test)]
 mod tests {
-    use crate::did_key::DidKey;
     use elliptic_curve::ScalarPrimitive;
+
+    use crate::did_key::DidKey;
 
     fn gen_did_key() -> DidKey {
         let secret_key = k256::SecretKey::new(ScalarPrimitive::from(1));

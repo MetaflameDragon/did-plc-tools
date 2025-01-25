@@ -1,18 +1,18 @@
+use std::collections::HashMap;
+use std::ops::Deref;
+
+use anyhow::{anyhow, Context, Result};
+use did_plc::{PlcOperationRef, PlcService, UnsignedPlcOperation};
+use egui::{RichText, Ui, ViewportCommand};
+use log::{error, info};
+use url::Url;
+
 use crate::app::AppSection;
 use crate::plc_builder::aka::AlsoKnownAsInterface;
 use crate::plc_builder::rotation_keys::RotationKeysInterface;
 use crate::plc_builder::services::ServicesInterface;
 use crate::plc_builder::verification_methods::VerificationMethodsInterface;
 use crate::signing_key::CryptoKeyContainer;
-use anyhow::{anyhow, Context, Result};
-use did_plc::PlcOperationRef;
-use did_plc::PlcService;
-use did_plc::UnsignedPlcOperation;
-use egui::{RichText, Ui, ViewportCommand};
-use log::{error, info};
-use std::collections::HashMap;
-use std::ops::Deref;
-use url::Url;
 
 type CryptoKey = (); // TODO
 

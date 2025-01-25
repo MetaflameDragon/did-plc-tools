@@ -1,4 +1,7 @@
-use crate::app::AppSection;
+use std::borrow::Borrow;
+use std::io::Write;
+use std::path::{Path, PathBuf};
+
 use anyhow::Context;
 use bincode::Options;
 use derive_more::From;
@@ -8,9 +11,8 @@ use egui::{RichText, Ui};
 use k256::Secp256k1;
 use log::{error, info};
 use serde::Serialize;
-use std::borrow::Borrow;
-use std::io::Write;
-use std::path::{Path, PathBuf};
+
+use crate::app::AppSection;
 
 // impl CryptoKey {
 //     pub fn new_keypair(keypair: secp256k1::Keypair) -> Self {

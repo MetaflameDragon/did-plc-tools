@@ -1,8 +1,8 @@
-use crate::app::AppSection;
-use anyhow::Context;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use did_plc::AkaUri;
 use egui::Ui;
+
+use crate::app::AppSection;
 
 #[derive(Debug, Default, Clone)]
 pub struct AlsoKnownAsInterface {

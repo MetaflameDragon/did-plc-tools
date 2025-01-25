@@ -1,9 +1,11 @@
-use crate::app::AppSection;
-use crate::ui_helpers::hash_map::HashMapRenderer;
+use std::collections::HashMap;
+
 use did_plc::PlcService;
 use egui::{RichText, Ui, Widget};
-use std::collections::HashMap;
 use url::Url;
+
+use crate::app::AppSection;
+use crate::ui_helpers::hash_map::HashMapRenderer;
 
 #[derive(Clone, Debug)]
 pub struct ServicesInterface {

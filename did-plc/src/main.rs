@@ -1,12 +1,10 @@
-use did_plc::AkaUri;
-use did_plc::DidPlc;
-use did_plc::PlcService;
-use did_plc::SignedPlcOperation;
-use did_plc::UnsignedPlcOperation;
+use std::collections::HashMap;
+use std::iter;
+
+use did_plc::{AkaUri, DidPlc, PlcService, SignedPlcOperation, UnsignedPlcOperation};
 use ecdsa::SigningKey;
 use k256::Secp256k1;
 use sha2::Digest;
-use std::{collections::HashMap, iter};
 use url::Url;
 
 mod helpers;

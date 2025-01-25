@@ -1,10 +1,11 @@
+use std::iter;
+use std::path::PathBuf;
+
 use derive_new::new;
 use did_plc::{PlcBlessedSigningKey, PlcBlessedSigningKeyBox};
 use ecdsa::SigningKey;
 use egui::{RichText, Ui};
 use k256::Secp256k1;
-use std::iter;
-use std::path::PathBuf;
 
 pub struct KeyStoreInterface {
     key_store_dir_str: String,

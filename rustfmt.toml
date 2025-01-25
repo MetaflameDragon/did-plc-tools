@@ -1,1 +1,3 @@
 newline_style = "Windows"
+imports_granularity = "Module"
+group_imports = "StdExternalCrate"

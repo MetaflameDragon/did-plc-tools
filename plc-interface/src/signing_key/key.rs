@@ -5,12 +5,12 @@ use derive_more::From;
 use did_key::DidKey;
 use ecdsa::SigningKey;
 use egui::{RichText, Ui};
+use k256::Secp256k1;
 use log::{error, info};
 use serde::Serialize;
 use std::borrow::Borrow;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use k256::Secp256k1;
 
 // impl CryptoKey {
 //     pub fn new_keypair(keypair: secp256k1::Keypair) -> Self {

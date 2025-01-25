@@ -47,7 +47,7 @@ where
     K: ToString + Clone + Eq + Hash,
     V: AppSection,
 {
-    fn draw_and_update(&mut self,ctx: &egui::Context,  ui: &mut Ui) {
+    fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
         Self::draw_map_items(&mut self.map, self.allow_remove, ctx, ui);
     }
 }
@@ -57,7 +57,12 @@ where
     K: ToString + Clone + Eq + Hash,
     V: AppSection,
 {
-    fn draw_map_items(map: &mut HashMap<K, V>, allow_removing: bool, ctx: &egui::Context, ui: &mut Ui) {
+    fn draw_map_items(
+        map: &mut HashMap<K, V>,
+        allow_removing: bool,
+        ctx: &egui::Context,
+        ui: &mut Ui,
+    ) {
         ui.group(|ui| {
             ui.vertical(|ui| {
                 if map.is_empty() {
@@ -82,7 +87,13 @@ where
     }
 
     /// Returns true if the X (remove) button is clicked
-    fn draw_item(key: &str, value: &mut V, allow_removing: bool, ctx: &egui::Context, ui: &mut Ui) -> bool {
+    fn draw_item(
+        key: &str,
+        value: &mut V,
+        allow_removing: bool,
+        ctx: &egui::Context,
+        ui: &mut Ui,
+    ) -> bool {
         let mut should_remove = false;
         ui.vertical(|ui| {
             ui.horizontal(|ui| {

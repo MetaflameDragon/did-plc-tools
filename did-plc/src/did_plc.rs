@@ -1,6 +1,6 @@
-use std::fmt::Display;
-use sha2::Digest;
 use crate::SignedPlcOperation;
+use sha2::Digest;
+use std::fmt::Display;
 
 pub struct DidPlc {
     plc_hash: String,

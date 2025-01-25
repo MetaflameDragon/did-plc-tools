@@ -1,13 +1,13 @@
-use did_key::DidKey;
-use std::collections::HashMap;
-use elliptic_curve::{CurveArithmetic, PrimeCurve};
-use ecdsa::signature::Signer;
-use ecdsa::{Signature, SignatureEncoding};
-use serde::{Deserialize, Serialize};
 use crate::aka_uri::AkaUri;
 use crate::operation::signed::SignedPlcOperation;
 use crate::plc_service::PlcService;
 use crate::PlcBlessedKeyCurve;
+use did_key::DidKey;
+use ecdsa::signature::Signer;
+use ecdsa::{Signature, SignatureEncoding};
+use elliptic_curve::{CurveArithmetic, PrimeCurve};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UnsignedPlcOperation {

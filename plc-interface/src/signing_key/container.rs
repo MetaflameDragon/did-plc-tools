@@ -1,5 +1,5 @@
+use crate::app::AppSection;
 use crate::ui_helpers::emoji;
-use crate::{app::AppSection};
 use derive_more::{Deref, DerefMut};
 use did_key::DidKey;
 use egui::{Color32, Modal, Ui, Widget};

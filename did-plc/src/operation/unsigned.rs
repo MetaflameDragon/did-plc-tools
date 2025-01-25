@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::aka_uri::AkaUri;
 use crate::operation::signed::SignedPlcOperation;
 use crate::plc_service::PlcService;
-use crate::PlcBlessedKeyType;
+use crate::PlcBlessedKeyCurve;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UnsignedPlcOperation {
@@ -70,7 +70,7 @@ impl UnsignedPlcOperation {
 
     pub fn sign<S, C>(self, signing_key: &S) -> SignedPlcOperation
     where
-        C: PlcBlessedKeyType,
+        C: PlcBlessedKeyCurve,
         C: PrimeCurve + CurveArithmetic,
         S: Signer<Signature<C>>,
         Signature<C>: SignatureEncoding,

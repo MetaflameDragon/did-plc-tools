@@ -1,4 +1,4 @@
-use crate::PlcBlessedKeyType;
+use crate::PlcBlessedKeyCurve;
 use base64::Engine;
 use ecdsa::signature::Signer;
 use ecdsa::SignatureEncoding;

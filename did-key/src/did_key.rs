@@ -1,14 +1,11 @@
 use crypto_traits::MulticodecPrefix;
 use derive_more::Into;
-use k256::PublicKey as Secp256k1PublicKey;
+use elliptic_curve::PublicKey;
+use k256::Secp256k1;
 use multibase::Base;
-use p256::PublicKey as P256PublicKey;
+use p256::NistP256;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-
-// prevent accidental ambiguous use of PublicKey
-#[allow(unused)]
-type PublicKey = !;
 
 const DID_KEY_PREFIX: &str = "did:key:";
 
@@ -21,18 +18,18 @@ pub struct DidKey {
     formatted_value: String,
 }
 
-impl From<Secp256k1PublicKey> for DidKey {
-    fn from(public_key: Secp256k1PublicKey) -> Self {
-        let multicodec_prefix = Secp256k1PublicKey::multicodec_prefix_unsigned_varint();
+impl From<PublicKey<Secp256k1>> for DidKey {
+    fn from(public_key: PublicKey<Secp256k1>) -> Self {
+        let multicodec_prefix = PublicKey::<Secp256k1>::multicodec_prefix_unsigned_varint();
         let key_bytes = public_key.to_sec1_bytes();
 
         make_did_key(&multicodec_prefix, &key_bytes)
     }
 }
 
-impl From<P256PublicKey> for DidKey {
-    fn from(public_key: P256PublicKey) -> Self {
-        let multicodec_prefix = P256PublicKey::multicodec_prefix_unsigned_varint();
+impl From<PublicKey<NistP256>> for DidKey {
+    fn from(public_key: PublicKey<NistP256>) -> Self {
+        let multicodec_prefix = PublicKey::<NistP256>::multicodec_prefix_unsigned_varint();
         let key_bytes = public_key.to_sec1_bytes();
 
         make_did_key(&multicodec_prefix, &key_bytes)
@@ -51,7 +48,7 @@ impl TryFrom<String> for DidKey {
     type Error = Error;
     fn try_from(value: String) -> Result<Self, Self::Error> {
         if !value.starts_with(DID_KEY_PREFIX) {
-            return Err(Self::Error::MissingPrefix);
+            return Err(Error::MissingPrefix);
         }
         // TODO: Verify value
         Ok(DidKey {

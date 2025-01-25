@@ -15,7 +15,3 @@ pub trait MulticodecPrefix {
         out_buf.iter().copied().collect()
     }
 }
-
-pub trait PlcBlessedSigningKey {
-    fn sign(&self);
-}

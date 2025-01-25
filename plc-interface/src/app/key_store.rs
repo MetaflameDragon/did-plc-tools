@@ -1,6 +1,12 @@
 use derive_new::new;
-use egui::Ui;
+use did_plc::{PlcBlessedSigningKey, PlcBlessedSigningKeyBox};
+use ecdsa::SigningKey;
+use egui::{RichText, Ui};
+use k256::Secp256k1;
+use std::hash::Hash;
+use std::iter;
 use std::path::PathBuf;
+use did_key::DidKey;
 
 pub struct KeyStoreInterface {
     key_store_dir_str: String,
@@ -28,7 +34,9 @@ impl KeyStoreInterface {
         });
         ui.vertical(|ui| {
             for key in &self.store.loaded_keys {
-                ui.label(key);
+                let formatted_value = key.as_did_key().formatted_value().to_owned();
+                let label = RichText::new(formatted_value);
+                ui.label(label.monospace());
             }
         });
     }
@@ -39,7 +47,7 @@ struct KeyStore {
     #[new(into)]
     key_store_path: PathBuf,
     #[new(default)]
-    loaded_keys: Vec<String>,
+    loaded_keys: Vec<PlcBlessedSigningKeyBox>,
 }
 
 impl KeyStore {
@@ -48,9 +56,12 @@ impl KeyStore {
     }
 
     pub fn refresh(&mut self) {
-        self.loaded_keys = vec!["abc", "def", "ghi"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect();
+        let mut rng = rand::rngs::OsRng;
+        self.loaded_keys = iter::repeat_with(|| {
+            let key: SigningKey<Secp256k1> = PlcBlessedSigningKey::new_random(&mut rng);
+            key.into()
+        })
+        .take(3)
+        .collect();
     }
 }

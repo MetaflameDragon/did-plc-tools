@@ -1,12 +1,12 @@
-use elliptic_curve::{CurveArithmetic, PrimeCurve};
+use crate::did_plc::DidPlc;
+use crate::operation::unsigned::UnsignedPlcOperation;
+use crate::PlcBlessedKeyCurve;
+use base64::engine::general_purpose::URL_SAFE as BASE64_URL_SAFE;
+use base64::Engine;
 use ecdsa::signature::Signer;
 use ecdsa::{Signature, SignatureEncoding};
-use base64::engine::general_purpose::URL_SAFE as BASE64_URL_SAFE;
+use elliptic_curve::{CurveArithmetic, PrimeCurve};
 use serde::{Deserialize, Serialize};
-use base64::Engine;
-use crate::operation::unsigned::UnsignedPlcOperation;
-use crate::PlcBlessedKeyType;
-use crate::did_plc::DidPlc;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SignedPlcOperation {
@@ -19,7 +19,7 @@ impl SignedPlcOperation {
     pub fn new<S, C>(unsigned_op: UnsignedPlcOperation, signing_key: &S) -> Self
     where
         // Curve C must be "blessed" (allowed by spec), and Signing key S must sign with curve C
-        C: PlcBlessedKeyType,
+        C: PlcBlessedKeyCurve,
         C: PrimeCurve + CurveArithmetic,
         S: Signer<Signature<C>>,
         Signature<C>: SignatureEncoding,

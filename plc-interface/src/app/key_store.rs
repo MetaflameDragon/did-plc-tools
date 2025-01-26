@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use derive_new::new;
 use did_plc::{PlcBlessedSigningKey, PlcBlessedSigningKeyBox};
 use ecdsa::SigningKey;
-use egui::{RichText, Ui};
+use egui::{Button, CollapsingHeader, RichText, Ui};
 use k256::Secp256k1;
 
 pub struct KeyStoreInterface {
@@ -31,12 +31,15 @@ impl KeyStoreInterface {
             };
             ui.text_edit_singleline(&mut self.key_store_dir_str);
         });
-        ui.vertical(|ui| {
-            for key in &self.store.loaded_keys {
-                let formatted_value = key.as_did_key().formatted_value().to_owned();
-                let label = RichText::new(formatted_value);
-                ui.label(label.monospace());
-            }
+        let keys_header = format!("Keys ({})", &self.store.loaded_keys.len());
+        CollapsingHeader::new(keys_header).show(ui, |ui| {
+            ui.vertical(|ui| {
+                for key in &self.store.loaded_keys {
+                    let formatted_value = key.as_did_key().formatted_value().to_owned();
+                    let label = RichText::new(formatted_value);
+                    ui.label(label.monospace());
+                }
+            });
         });
     }
 }

@@ -1,15 +1,18 @@
 use std::iter;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
+use derive_more::Display;
 use derive_new::new;
 use did_plc::{PlcBlessedSigningKey, PlcBlessedSigningKeyBox};
 use ecdsa::SigningKey;
-use egui::{Button, CollapsingHeader, RichText, Ui};
+use egui::{Button, CollapsingHeader, Color32, Modal, Response, RichText, Ui};
 use k256::Secp256k1;
+use p256::NistP256;
 
 pub struct KeyStoreInterface {
     key_store_dir_str: String,
     store: KeyStore,
+    key_gen_interface: KeyGeneratorInterface,
 }
 
 impl KeyStoreInterface {
@@ -20,6 +23,9 @@ impl KeyStoreInterface {
         Self {
             key_store_dir_str,
             store,
+            key_gen_interface: KeyGeneratorInterface {
+                ..Default::default()
+            },
         }
     }
 
@@ -39,6 +45,14 @@ impl KeyStoreInterface {
                     let label = RichText::new(formatted_value);
                     ui.label(label.monospace());
                 }
+
+                if ui.button("Add Key").clicked() {
+                    self.key_gen_interface.set_modal_open_state(true);
+                }
+
+                let _new_key = self
+                    .key_gen_interface
+                    .ui(ui, Path::new(&self.key_store_dir_str));
             });
         });
     }
@@ -65,5 +79,79 @@ impl KeyStore {
         })
         .take(3)
         .collect();
+    }
+}
+
+#[derive(Default)]
+struct KeyGeneratorInterface {
+    modal_open: bool,
+    selected_key_type_index: usize,
+}
+
+impl KeyGeneratorInterface {
+    pub fn set_modal_open_state(&mut self, should_open: bool) {
+        self.modal_open = should_open;
+    }
+
+    pub fn ui(&mut self, ui: &mut Ui, key_store_path: &Path) {
+        if !self.modal_open {
+            return;
+        }
+
+        let modal_response = Modal::new(egui::Id::new("Key Store Generator Interface"))
+            .show(ui.ctx(), |ui| self.modal_ui(ui, key_store_path));
+
+        if modal_response.should_close() {
+            self.modal_open = false;
+        }
+    }
+
+    fn modal_ui(&mut self, ui: &mut Ui, key_store_path: &Path) -> Option<PlcBlessedSigningKeyBox> {
+        #[derive(Display)]
+        enum KeyType {
+            #[display("Secp256k1")]
+            Secp256k1,
+            #[display("NistP256 (p256)")]
+            NistP256,
+        }
+
+        let key_types = [KeyType::Secp256k1, KeyType::NistP256];
+
+        egui::ComboBox::from_id_salt("Key type selector").show_index(
+            ui,
+            &mut self.selected_key_type_index,
+            key_types.len(),
+            |selected_key_type_index| key_types[selected_key_type_index].to_string(),
+        );
+
+        ui.horizontal(|ui| {
+            ui.label(RichText::new("Will be saved to:").weak().italics());
+            let canonical_path = key_store_path.canonicalize();
+            let path_text = match canonical_path {
+                Ok(path) => RichText::new(path.display().to_string()).weak().italics(),
+                Err(_) => RichText::new(
+                    format!("[Invalid path] {}", key_store_path.display()).to_string(),
+                )
+                .color(Color32::DARK_RED),
+            };
+            ui.label(path_text);
+        });
+
+        if ui.button("Save new key").clicked() {
+            let mut rng = rand::rngs::OsRng;
+
+            let key: PlcBlessedSigningKeyBox = match key_types[self.selected_key_type_index] {
+                KeyType::Secp256k1 => SigningKey::<Secp256k1>::new_random(&mut rng).into(),
+                KeyType::NistP256 => SigningKey::<NistP256>::new_random(&mut rng).into(),
+            };
+
+            // TODO save
+
+            self.modal_open = false;
+
+            return Some(key);
+        };
+
+        None
     }
 }

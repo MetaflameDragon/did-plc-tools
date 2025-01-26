@@ -7,6 +7,7 @@ use did_plc::{PlcBlessedSigningKey, PlcBlessedSigningKeyBox};
 use ecdsa::SigningKey;
 use egui::{Button, CollapsingHeader, Color32, Modal, Response, RichText, Ui};
 use k256::Secp256k1;
+use log::{error, info};
 use p256::NistP256;
 
 pub struct KeyStoreInterface {
@@ -145,11 +146,17 @@ impl KeyGeneratorInterface {
                 KeyType::NistP256 => SigningKey::<NistP256>::new_random(&mut rng).into(),
             };
 
-            // TODO save
+            let key_path =
+                key_store_path.join(key.as_did_key().multibase_value().to_owned() + ".priv");
 
-            self.modal_open = false;
+            info!("Saving key to {}", key_path.display());
+            if let Err(err) = key.write_to_file(&key_path) {
+                error!("Failed to save key: {}", err);
+            } else {
+                self.modal_open = false;
 
-            return Some(key);
+                return Some(key);
+            }
         };
 
         None

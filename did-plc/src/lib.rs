@@ -4,12 +4,14 @@ use ecdsa::{Signature, SignatureEncoding, SigningKey};
 extern crate derive_getters;
 
 use std::ops::Add;
+use std::path::Path;
 
 use derive_more::{Deref, DerefMut, From, Into};
 use ecdsa::hazmat::SignPrimitive;
 use ecdsa::signature::digest::generic_array::ArrayLength;
 use ecdsa::signature::rand_core::CryptoRngCore;
 use ecdsa::signature::Signer;
+use elliptic_curve::pkcs8::{EncodePrivateKey, LineEnding};
 use elliptic_curve::{CurveArithmetic, PrimeCurve, PublicKey};
 use k256::Secp256k1;
 use p256::NistP256;
@@ -42,6 +44,8 @@ pub trait PlcBlessedSigningKey {
         Self: Sized;
 
     fn as_did_key(&self) -> DidKey;
+
+    fn write_to_file(&self, path: &Path) -> std::io::Result<()>;
 }
 
 impl<C> PlcBlessedSigningKey for SigningKey<C>
@@ -52,6 +56,7 @@ where
     <<C as elliptic_curve::Curve>::FieldBytesSize as Add>::Output: ArrayLength<u8>,
     <C as CurveArithmetic>::Scalar: SignPrimitive<C>,
     SigningKey<C>: Signer<Signature<C>>,
+    SigningKey<C>: EncodePrivateKey,
     PublicKey<C>: Into<DidKey>,
 {
     fn sign_to_bytes(&self, bytes: &[u8]) -> Vec<u8> {
@@ -65,6 +70,13 @@ where
 
     fn as_did_key(&self) -> DidKey {
         elliptic_curve::PublicKey::from(self.verifying_key()).into()
+    }
+
+    fn write_to_file(&self, path: &Path) -> std::io::Result<()> {
+        match self.write_pkcs8_pem_file(path, LineEnding::LF) {
+            Ok(()) => Ok(()),
+            Err(err) => Err(std::io::Error::new(std::io::ErrorKind::Other, err)),
+        }
     }
 }
 

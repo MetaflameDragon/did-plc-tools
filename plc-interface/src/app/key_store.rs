@@ -146,8 +146,7 @@ impl KeyGeneratorInterface {
                 KeyType::NistP256 => SigningKey::<NistP256>::new_random(&mut rng).into(),
             };
 
-            let key_path =
-                key_store_path.join(key.as_did_key().multibase_value().to_owned() + ".priv");
+            let key_path = key_store_path.join(key.as_did_key().multibase_value().to_owned());
 
             info!("Saving key to {}", key_path.display());
             if let Err(err) = key.write_to_file(&key_path) {

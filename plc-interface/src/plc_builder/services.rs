@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use did_plc::PlcService;
 use egui::{RichText, Ui, Widget};
-use url::Url;
 
 use crate::app::AppSection;
 use crate::ui_helpers::hash_map::HashMapRenderer;
@@ -69,10 +68,10 @@ impl From<PlcService> for PlcServiceInterface {
 impl TryInto<PlcService> for PlcServiceInterface {
     type Error = anyhow::Error;
 
-    fn try_into(self) -> std::result::Result<PlcService, Self::Error> {
+    fn try_into(self) -> Result<PlcService, Self::Error> {
         Ok(PlcService {
             r#type: self.r#type,
-            endpoint: Url::parse(self.endpoint_buffer.as_str())?,
+            endpoint: self.endpoint_buffer,
         })
     }
 }

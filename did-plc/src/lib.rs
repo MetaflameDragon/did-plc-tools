@@ -30,6 +30,7 @@ use did_key::DidKey;
 pub use did_plc::DidPlc;
 pub use handle::validate_handle;
 pub use operation::{SignatureBase64Url, SignedPlcOperation, UnsignedPlcOperation};
+pub use plc_operation_ref::PlcOperationRef;
 pub use plc_service::PlcService;
 
 pub trait PlcBlessedKeyCurve {}

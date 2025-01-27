@@ -2,9 +2,10 @@ use std::collections::HashMap;
 use std::ops::Deref;
 
 use anyhow::{anyhow, bail, Context, Result};
-use did_plc::{PlcService, UnsignedPlcOperation};
+use did_plc::{PlcOperationRef, PlcService, SignedPlcOperation, UnsignedPlcOperation};
 use egui::{RichText, Ui, ViewportCommand};
 use log::{error, info};
+use serde_json::to_string;
 use url::Url;
 
 use crate::app::AppSection;
@@ -25,7 +26,7 @@ pub struct PlcBuilderInterface {
     rotation_keys: RotationKeysInterface,
     verification_methods: VerificationMethodsInterface,
     services: ServicesInterface,
-    prev: String,
+    prev: Option<PlcOperationRef>,
 
     plc_json_loader: PlcJsonLoader,
     signing_key_selector: SigningKeySelector,
@@ -49,7 +50,11 @@ impl AppSection for PlcBuilderInterface {
             self.services.draw_and_update(ctx, ui);
 
             ui.heading("Previous CID:");
-            ui.text_edit_singleline(&mut self.prev);
+            ui.label(
+                self.prev
+                    .map(|value| value.to_string())
+                    .unwrap_or("".to_owned()),
+            );
 
             ui.group(|ui| self.draw_action_column(ctx, ui));
         });
@@ -73,8 +78,8 @@ impl PlcBuilderInterface {
             }
         };
 
-        if let Some(plc_op) = plc_op {
-            match Self::from_plc_op(plc_op) {
+        if let Some(signed_plc_op) = plc_op {
+            match Self::from_signed_plc_op_with_ref(signed_plc_op) {
                 Ok(new) => {
                     *self = new;
                 }
@@ -119,16 +124,7 @@ impl PlcBuilderInterface {
                     })
                     .collect::<Result<Vec<_>>>()?,
             ),
-            if !self.prev.is_empty() {
-                Some(
-                    self.prev
-                        .clone()
-                        .try_into()
-                        .context("Failed to parse prev CID")?,
-                )
-            } else {
-                None
-            },
+            self.prev.clone(),
         )?)
     }
 
@@ -189,7 +185,13 @@ impl PlcBuilderInterface {
         // }
     }
 
-    fn from_plc_op(plc_op: UnsignedPlcOperation) -> Result<Self> {
+    fn from_signed_plc_op_with_ref(plc_op: SignedPlcOperation) -> Result<Self> {
+        let mut new = Self::from_unsigned_plc_op_direct((*plc_op).clone())?;
+        new.prev = Some(PlcOperationRef::from_signed_op(&plc_op)?);
+        Ok(new)
+    }
+
+    fn from_unsigned_plc_op_direct(plc_op: UnsignedPlcOperation) -> Result<Self> {
         let also_known_as =
             AlsoKnownAsInterface::from_aka_uris(plc_op.also_known_as().iter().cloned());
 
@@ -200,10 +202,7 @@ impl PlcBuilderInterface {
 
         let services = ServicesInterface::from_map(plc_op.services().clone());
 
-        let prev = plc_op
-            .prev()
-            .map(|plc_op_ref| plc_op_ref.to_string())
-            .unwrap_or(String::new());
+        let prev = plc_op.prev();
 
         Ok(Self {
             also_known_as,
@@ -267,9 +266,9 @@ impl PlcJsonLoader {
     /// Displays the UI
     ///
     /// Returns `Some(Result)` when the user attempts to parse a PLC operation.
-    /// - `Result::Ok(UnsignedPlcOperation)` if parsing was successful.
+    /// - `Result::Ok(SignedPlcOperation)` if parsing was successful.
     /// - `Result::Err` with an `anyhow` error if there was an error while parsing.
-    fn ui(&mut self, ctx: &egui::Context, ui: &mut Ui) -> Option<Result<UnsignedPlcOperation>> {
+    fn ui(&mut self, ctx: &egui::Context, ui: &mut Ui) -> Option<Result<SignedPlcOperation>> {
         if ui.button("Load from clipboard (JSON)").clicked() {
             ui.ctx().send_viewport_cmd(ViewportCommand::RequestPaste);
             ui.response().request_focus();

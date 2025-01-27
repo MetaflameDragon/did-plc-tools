@@ -1,6 +1,7 @@
 use base64::engine::general_purpose::URL_SAFE as BASE64_URL_SAFE;
 use base64::Engine;
 use cid::Cid;
+use derive_more::Deref;
 use ecdsa::signature::Signer;
 use ecdsa::{Signature, SignatureEncoding};
 use elliptic_curve::{CurveArithmetic, PrimeCurve};
@@ -17,10 +18,11 @@ use crate::PlcBlessedKeyCurve;
 ///
 /// Field order matters for `serde_json`, and matches the order
 /// used by [plc.directory](https://plc.directory).
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Deref, Clone)]
 pub struct SignedPlcOperation {
     sig: SignatureBase64Url,
     #[serde(flatten)]
+    #[deref]
     inner: UnsignedPlcOperation,
 }
 

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::ops::Deref;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use did_plc::{PlcOperationRef, PlcService, UnsignedPlcOperation};
 use egui::{RichText, Ui, ViewportCommand};
 use log::{error, info};
@@ -60,13 +60,29 @@ impl AppSection for PlcBuilderInterface {
 
 impl PlcBuilderInterface {
     fn draw_plc_loader_interface(&mut self, ctx: &egui::Context, ui: &mut Ui) {
-        match self.plc_json_loader.ui(ctx, ui) {
-            None => {}
+        let plc_op = match self.plc_json_loader.ui(ctx, ui) {
+            None => None,
             Some(Ok(plc_op)) => {
                 info!("Loading plc json: {:?}", plc_op);
+                Some(plc_op)
             }
             Some(Err(e)) => {
-                error!("{:?}", e);
+                error!("Error loading plc json:");
+                for err in e.chain().take(3) {
+                    error!(": {}", err);
+                }
+                None
+            }
+        };
+
+        if let Some(plc_op) = plc_op {
+            match Self::from_plc_op(plc_op) {
+                Ok(new) => {
+                    *self = new;
+                }
+                Err(err) => {
+                    error!("Failed to load PLC operation: {err}");
+                }
             }
         }
     }
@@ -169,8 +185,8 @@ impl PlcBuilderInterface {
         }
     }
 
-    fn load_from_plc_op(&mut self, plc_op: UnsignedPlcOperation) -> Result<()> {
-        todo!()
+    fn from_plc_op(plc_op: UnsignedPlcOperation) -> Result<Self> {
+        bail!("Not implemented")
         // self.also_known_as.set_aka_uris(plc_op.also_known_as())?;
         // let rotation_keys = plc_op.rotation_keys().iter().map(|did_key|);
         // self.rotation_keys.set_keys(rotation_keys);
@@ -227,13 +243,18 @@ impl SigningKeySelector {
 struct PlcJsonLoader {}
 
 impl PlcJsonLoader {
+    /// Displays the UI
+    ///
+    /// Returns `Some(Result)` when the user attempts to parse a PLC operation.
+    /// - `Result::Ok(UnsignedPlcOperation)` if parsing was successful.
+    /// - `Result::Err` with an `anyhow` error if there was an error while parsing.
     fn ui(&mut self, ctx: &egui::Context, ui: &mut Ui) -> Option<Result<UnsignedPlcOperation>> {
         if ui.button("Load from clipboard (JSON)").clicked() {
             ui.ctx().send_viewport_cmd(ViewportCommand::RequestPaste);
             ui.response().request_focus();
         }
 
-        if let Some(clipboard) = ui.input(|i| {
+        let clipboard = ui.input(|i| {
             i.events.iter().find_map(|e| {
                 if let egui::Event::Paste(paste) = e {
                     Some(paste.to_owned())
@@ -241,16 +262,14 @@ impl PlcJsonLoader {
                     None
                 }
             })
-        }) {
-            if clipboard.is_empty() {
-                return Some(Err(anyhow!("Clipboard is empty")));
-            }
-            return Some(
-                serde_json::de::from_str(&clipboard)
-                    .context("Failed to deserialize JSON in clipboard"),
-            );
+        })?;
+
+        if clipboard.is_empty() {
+            return Some(Err(anyhow!("Clipboard is empty")));
         }
 
-        None
+        Some(
+            serde_json::de::from_str(&clipboard).context("Failed to deserialize JSON in clipboard"),
+        )
     }
 }

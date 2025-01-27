@@ -1,5 +1,5 @@
-use std::iter;
 use std::path::{Path, PathBuf};
+use std::{fs, iter};
 
 use derive_more::Display;
 use derive_new::new;
@@ -51,9 +51,14 @@ impl KeyStoreInterface {
                     self.key_gen_interface.set_modal_open_state(true);
                 }
 
-                let _new_key = self
+                let new_key = self
                     .key_gen_interface
                     .ui(ui, Path::new(&self.key_store_dir_str));
+
+                if let Some(_new_key) = new_key {
+                    // TODO: update without a full refresh
+                    self.store.refresh();
+                }
             });
         });
     }
@@ -73,13 +78,34 @@ impl KeyStore {
     }
 
     pub fn refresh(&mut self) {
-        let mut rng = rand::rngs::OsRng;
-        self.loaded_keys = iter::repeat_with(|| {
-            let key: SigningKey<Secp256k1> = PlcBlessedSigningKey::new_random(&mut rng);
-            key.into()
-        })
-        .take(3)
-        .collect();
+        let dir_iter = match fs::read_dir(&self.key_store_path) {
+            Ok(iterator) => iterator,
+            Err(err) => {
+                error!("Error refreshing keys: {err}");
+                return;
+            }
+        };
+
+        self.loaded_keys.clear();
+
+        for file in dir_iter {
+            let file = match file {
+                Ok(file) => file,
+                Err(err) => {
+                    error!("Unexpected IO error when iterating dir: {}", err);
+                    continue;
+                }
+            };
+
+            let key = match PlcBlessedSigningKeyBox::read_from_file_pem(&file.path()) {
+                Ok(key) => key,
+                Err(err) => {
+                    error!("Error reading file {}: {}", file.path().display(), err);
+                    continue;
+                }
+            };
+            self.loaded_keys.push(key);
+        }
     }
 }
 
@@ -94,9 +120,9 @@ impl KeyGeneratorInterface {
         self.modal_open = should_open;
     }
 
-    pub fn ui(&mut self, ui: &mut Ui, key_store_path: &Path) {
+    pub fn ui(&mut self, ui: &mut Ui, key_store_path: &Path) -> Option<PlcBlessedSigningKeyBox> {
         if !self.modal_open {
-            return;
+            return None;
         }
 
         let modal_response = Modal::new(egui::Id::new("Key Store Generator Interface"))
@@ -105,6 +131,8 @@ impl KeyGeneratorInterface {
         if modal_response.should_close() {
             self.modal_open = false;
         }
+
+        modal_response.inner
     }
 
     fn modal_ui(&mut self, ui: &mut Ui, key_store_path: &Path) -> Option<PlcBlessedSigningKeyBox> {

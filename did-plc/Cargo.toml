@@ -13,7 +13,8 @@ serde_ipld_dagcbor = { workspace = true }
 sha2 = { workspace = true }
 p256 = { workspace = true, features = ["ecdsa"] }
 k256 = { version = "0.13", features = ["ecdsa"] }
-elliptic-curve = "^0.13"
+elliptic-curve = { version = "^0.13", features = ["pkcs8"] }
+pkcs8 = { version = "^0.10", features = ["pkcs5"] }
 crypto-traits = { workspace = true }
 ecdsa = { version = "^0.16", features = ["signing", "verifying"] }
 
@@ -24,7 +25,12 @@ url = { workspace = true, features = ["serde"] }
 
 chrono = { workspace = true }
 thiserror = { workspace = true }
-derive_more = { workspace = true }
+derive_more = { workspace = true, features = ["deref", "deref_mut"] }
 derive-getters = { version = "0.5.0", features = ["auto_copy_getters"] }
 regex = "1.11.1"
 rand = "0.8.5"
+
+log = "0.4.25"
+
+[dev-dependencies]
+test-log = "^0.2"

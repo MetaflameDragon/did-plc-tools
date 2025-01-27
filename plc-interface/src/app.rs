@@ -17,13 +17,12 @@ pub struct App {
 
 impl App {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
-        let pds_endpoint = Url::from_str("https://scalytooth.metaflame.dev")
-            .expect("Failed to parse PDS endpoint URL");
         let storage = cc.storage;
 
         App {
             key_store: init_key_store(storage),
-            plc_builder: PlcBuilderInterface::default().with_atproto_pds(pds_endpoint),
+            plc_builder: PlcBuilderInterface::default()
+                .with_atproto_pds(Url::parse("https://pds.domain.placeholder").unwrap()),
         }
     }
 }

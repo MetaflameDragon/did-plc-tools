@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{Context, Result};
 use did_key::DidKey;
 use egui::Ui;
 
@@ -31,7 +31,12 @@ impl AppSection for RotationKeysInterface {
 
 impl RotationKeysInterface {
     pub fn try_get_keys(&self) -> Result<Vec<DidKey>> {
-        bail!("Not implemented");
+        self.rotation_keys_str
+            .iter()
+            .cloned()
+            .filter(|k| !k.is_empty())
+            .map(|str| DidKey::try_from(str).context("Failed to parse did:key"))
+            .collect::<Result<Vec<_>>>()
     }
 
     pub fn from_keys(keys: impl IntoIterator<Item = DidKey>) -> Self {

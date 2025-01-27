@@ -97,18 +97,8 @@ impl PlcBuilderInterface {
 
     fn get_unsigned_plc_op(&self) -> Result<UnsignedPlcOperation> {
         Ok(UnsignedPlcOperation::new(
-            // self.rotation_keys
-            //     .keys()
-            //     .iter()
-            //     .filter_map(|k| k.as_ref().map(|k| k.as_did_key()))
-            //     .collect(),
-            todo!(),
-            // self.verification_methods
-            //     .get_map()
-            //     .iter()
-            //     .map(|(key, value)| (key.clone(), value.as_did_key()))
-            //     .collect(),
-            todo!(),
+            self.rotation_keys.try_get_keys()?,
+            self.verification_methods.get_map().clone(),
             self.also_known_as
                 .get_aka_uris()
                 .context("Failed to parse AkaUris")?,
@@ -124,7 +114,7 @@ impl PlcBuilderInterface {
                     })
                     .collect::<Result<Vec<_>>>()?,
             ),
-            self.prev.clone(),
+            self.prev,
         )?)
     }
 
@@ -138,7 +128,9 @@ impl PlcBuilderInterface {
                     info!("{json}");
                 }
                 Err(err) => {
-                    error!("{err}")
+                    for err in err.chain().take(3) {
+                        error!("{}", err);
+                    }
                 }
             }
         }

@@ -137,8 +137,6 @@ impl PlcOperationRef {
         &self.0
     }
     pub fn from_signed_op(plc_op: &SignedPlcOperation) -> Result<PlcOperationRef, Error> {
-        // TODO fix
-        todo!();
         let bytes = serde_ipld_dagcbor::ser::to_vec(plc_op)?;
         Self::from_dag_cbor(&bytes)
     }
@@ -156,7 +154,6 @@ mod tests {
     use std::assert_matches::assert_matches;
 
     use multihash_codetable::{Code, MultihashDigest};
-    use serde_ipld_dagcbor::ser::BufWriter;
 
     use super::*;
     use crate::plc_operation_ref::codes::PLC_MULTIBASE_CODEC;
@@ -251,13 +248,7 @@ mod tests {
         }
         "#;
 
-        // TODO use SignedPlcOperation instead of transcode
-        let mut writer = BufWriter::new(Vec::new());
-
-        let mut deser_json = serde_json::Deserializer::from_str(plc_op_json);
-        let mut ser_dag_cbor = serde_ipld_dagcbor::ser::Serializer::new(&mut writer);
-
-        serde_transcode::transcode(&mut deser_json, &mut ser_dag_cbor).unwrap();
+        let plc_op: SignedPlcOperation = serde_json::from_str(plc_op_json).unwrap();
 
         // Taken from log/audit
         let expected_ref_cid = PlcOperationRef::try_from(
@@ -265,7 +256,7 @@ mod tests {
         )
         .unwrap();
 
-        let ref_cid = PlcOperationRef::from_dag_cbor(writer.buffer());
+        let ref_cid = PlcOperationRef::from_signed_op(&plc_op);
 
         assert_matches!(ref_cid, Ok(_));
         assert_eq!(ref_cid.unwrap(), expected_ref_cid)

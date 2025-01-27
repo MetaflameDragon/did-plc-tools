@@ -12,10 +12,26 @@ use crate::plc_operation_ref::PlcOperationRef;
 use crate::plc_service::PlcService;
 use crate::PlcBlessedKeyCurve;
 
+/// Represents an unsigned PLC operation (all fields except for `sig`).
+///
+/// Field order matters for `serde_json`, and matches the order
+/// used by [plc.directory](https://plc.directory).
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UnsignedPlcOperation {
+    // CID Hash reference to previous operation, null (None) for genesis operations
+    prev: Option<PlcOperationRef>,
+
     // Fixed value "plc_operation"
     r#type: String,
+
+    // Key-value map of services, services must have a type and endpoint.
+    // Endpoint must be a valid http(s)-prefixed url
+    // Key is currently just "atproto_pds" for type "AtprotoPersonalDataServer"
+    services: HashMap<String, PlcService>,
+
+    // Array of at:// handles
+    #[serde(rename = "alsoKnownAs")]
+    also_known_as: Vec<AkaUri>,
 
     // Array of up to 5 rotation keys
     #[serde(rename = "rotationKeys")]
@@ -24,18 +40,6 @@ pub struct UnsignedPlcOperation {
     // Key-value map of verification methods (e.g. "atproto" & signing key)
     #[serde(rename = "verificationMethods")]
     verification_methods: HashMap<String, DidKey>,
-
-    // Array of at:// handles
-    #[serde(rename = "alsoKnownAs")]
-    also_known_as: Vec<AkaUri>,
-
-    // Key-value map of services, services must have a type and endpoint.
-    // Endpoint must be a valid http(s)-prefixed url
-    // Key is currently just "atproto_pds" for type "AtprotoPersonalDataServer"
-    services: HashMap<String, PlcService>,
-
-    // CID Hash reference to previous operation, null (None) for genesis operations
-    prev: Option<PlcOperationRef>,
 }
 
 impl UnsignedPlcOperation {

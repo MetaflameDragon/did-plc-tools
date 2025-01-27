@@ -1,5 +1,6 @@
 use base64::engine::general_purpose::URL_SAFE as BASE64_URL_SAFE;
 use base64::Engine;
+use cid::Cid;
 use ecdsa::signature::Signer;
 use ecdsa::{Signature, SignatureEncoding};
 use elliptic_curve::{CurveArithmetic, PrimeCurve};
@@ -40,6 +41,10 @@ impl SignedPlcOperation {
     pub fn get_did_plc(&self) -> DidPlc {
         // TODO: Limit to genesis op?
         DidPlc::from_signed_op(self)
+    }
+
+    pub fn get_cid_pointer(&self) -> Cid {
+        todo!()
     }
 }
 

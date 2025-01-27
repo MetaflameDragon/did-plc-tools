@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::aka_uri::AkaUri;
 use crate::operation::signed::SignedPlcOperation;
+use crate::plc_operation_ref::PlcOperationRef;
 use crate::plc_service::PlcService;
 use crate::PlcBlessedKeyCurve;
 
@@ -96,11 +97,13 @@ impl UnsignedPlcOperation {
         &self.services
     }
 
-    pub fn prev(&self) -> Option<&PlcOperationRef> {
-        self.prev.as_ref()
+    pub fn prev(&self) -> Option<PlcOperationRef> {
+        self.prev // Copiable
     }
 }
 
-// TODO: Use CID
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct PlcOperationRef(pub String);
+#[cfg(test)]
+mod tests {
+    #[test_log::test]
+    fn test() {}
+}

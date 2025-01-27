@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::ops::Deref;
 
 use anyhow::{anyhow, bail, Context, Result};
-use did_plc::{PlcOperationRef, PlcService, UnsignedPlcOperation};
+use did_plc::{PlcService, UnsignedPlcOperation};
 use egui::{RichText, Ui, ViewportCommand};
 use log::{error, info};
 use url::Url;
@@ -13,8 +13,6 @@ use crate::plc_builder::rotation_keys::RotationKeysInterface;
 use crate::plc_builder::services::ServicesInterface;
 use crate::plc_builder::verification_methods::VerificationMethodsInterface;
 use crate::signing_key::CryptoKeyContainer;
-
-type CryptoKey = (); // TODO
 
 mod aka;
 mod rotation_keys;
@@ -122,7 +120,12 @@ impl PlcBuilderInterface {
                     .collect::<Result<Vec<_>>>()?,
             ),
             if !self.prev.is_empty() {
-                Some(PlcOperationRef(self.prev.clone()))
+                Some(
+                    self.prev
+                        .clone()
+                        .try_into()
+                        .context("Failed to parse prev CID")?,
+                )
             } else {
                 None
             },
@@ -199,8 +202,7 @@ impl PlcBuilderInterface {
 
         let prev = plc_op
             .prev()
-            .cloned()
-            .map(|cid| cid.0)
+            .map(|plc_op_ref| plc_op_ref.to_string())
             .unwrap_or(String::new());
 
         Ok(Self {

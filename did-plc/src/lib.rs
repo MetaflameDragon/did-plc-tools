@@ -1,5 +1,5 @@
 #![feature(never_type)]
-
+#![feature(assert_matches)]
 #[macro_use]
 extern crate derive_getters;
 use std::fs;
@@ -22,15 +22,14 @@ mod aka_uri;
 mod did_plc;
 mod handle;
 mod operation;
+mod plc_operation_ref;
 mod plc_service;
 
 pub use aka_uri::AkaUri;
 use did_key::DidKey;
 pub use did_plc::DidPlc;
 pub use handle::validate_handle;
-pub use operation::{
-    PlcOperationRef, SignatureBase64Url, SignedPlcOperation, UnsignedPlcOperation,
-};
+pub use operation::{SignatureBase64Url, SignedPlcOperation, UnsignedPlcOperation};
 pub use plc_service::PlcService;
 
 pub trait PlcBlessedKeyCurve {}

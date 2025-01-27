@@ -17,6 +17,7 @@ elliptic-curve = { version = "^0.13", features = ["pkcs8"] }
 pkcs8 = { version = "^0.10", features = ["pkcs5"] }
 crypto-traits = { workspace = true }
 ecdsa = { version = "^0.16", features = ["signing", "verifying"] }
+cid = "^0.11"
 
 multibase = { workspace = true }
 base64 = { workspace = true }
@@ -34,3 +35,4 @@ log = "0.4.25"
 
 [dev-dependencies]
 test-log = "^0.2"
+multihash-codetable = { version = "0.1.0", default-features = false, features = ["digest", "sha2"] }

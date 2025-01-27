@@ -24,6 +24,7 @@ mod codes {
     const MULTIHASH_SHA_256: u64 = 0x12;
 }
 
+#[allow(unused_qualifications)]
 /// Wrapper for [`cid::Cid`].
 ///
 /// CID parameters for did:plc's `prev` field ([specs](https://web.plc.directory/spec/v0.1/did-plc)) are:

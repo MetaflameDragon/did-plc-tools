@@ -39,28 +39,30 @@ impl KeyStoreInterface {
             ui.text_edit_singleline(&mut self.key_store_dir_str);
         });
         let keys_header = format!("Keys ({})", &self.store.loaded_keys.len());
-        CollapsingHeader::new(keys_header).show(ui, |ui| {
-            ui.vertical(|ui| {
-                for key in &self.store.loaded_keys {
-                    let formatted_value = key.as_did_key().formatted_value().to_owned();
-                    let label = RichText::new(formatted_value);
-                    ui.label(label.monospace());
-                }
+        CollapsingHeader::new(keys_header)
+            .id_salt(egui::Id::from("Keys collapsing header"))
+            .show(ui, |ui| {
+                ui.vertical(|ui| {
+                    for key in &self.store.loaded_keys {
+                        let formatted_value = key.as_did_key().formatted_value().to_owned();
+                        let label = RichText::new(formatted_value);
+                        ui.label(label.monospace());
+                    }
 
-                if ui.button("Add Key").clicked() {
-                    self.key_gen_interface.set_modal_open_state(true);
-                }
+                    if ui.button("Add Key").clicked() {
+                        self.key_gen_interface.set_modal_open_state(true);
+                    }
 
-                let new_key = self
-                    .key_gen_interface
-                    .ui(ui, Path::new(&self.key_store_dir_str));
+                    let new_key = self
+                        .key_gen_interface
+                        .ui(ui, Path::new(&self.key_store_dir_str));
 
-                if let Some(_new_key) = new_key {
-                    // TODO: update without a full refresh
-                    self.store.refresh();
-                }
+                    if let Some(_new_key) = new_key {
+                        // TODO: update without a full refresh
+                        self.store.refresh();
+                    }
+                });
             });
-        });
     }
 }
 

@@ -34,5 +34,6 @@ rand = "0.8.5"
 log = "0.4.25"
 
 [dev-dependencies]
+serde-transcode = "^1.1"
 test-log = "^0.2"
 multihash-codetable = { version = "0.1.0", default-features = false, features = ["digest", "sha2"] }

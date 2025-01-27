@@ -1073,6 +1073,7 @@ dependencies = [
  "rand",
  "regex",
  "serde",
+ "serde-transcode",
  "serde_ipld_dagcbor",
  "serde_json",
  "sha2 0.11.0-pre.4",
@@ -3170,6 +3171,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "02fc4265df13d6fa1d00ecff087228cc0a2b5f3c0e87e258d8b94a156e984c70"
 dependencies = [
  "serde_derive",
+]
+
+[[package]]
+name = "serde-transcode"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "590c0e25c2a5bb6e85bf5c1bce768ceb86b316e7a01bdf07d2cb4ec2271990e2"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

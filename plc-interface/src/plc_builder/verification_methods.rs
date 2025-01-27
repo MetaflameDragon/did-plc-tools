@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use anyhow::{bail, Result};
+use did_key::DidKey;
 use egui::{TextBuffer, Ui};
 use log::error;
 
@@ -8,42 +9,37 @@ use crate::app::AppSection;
 use crate::signing_key::CryptoKeyContainer;
 use crate::ui_helpers::hash_map::HashMapRenderer;
 
-type CryptoKey = (); // TODO
-
 #[derive(Default, Clone, Debug)]
 pub struct VerificationMethodsInterface {
-    map_renderer: HashMapRenderer<String, CryptoKey>,
+    map_renderer: HashMapRenderer<String, DidKey>,
     input_fields: InputFields,
 }
 
 #[derive(Default, Clone, Debug)]
 struct InputFields {
     name: String,
-    key: CryptoKeyContainer,
+    key_str: String,
 }
 
 impl InputFields {
-    fn try_get_verification_method(&mut self) -> Result<(String, CryptoKey)> {
+    fn try_get_verification_method(&mut self) -> Result<(String, DidKey)> {
         if self.name.is_empty() {
             bail!("Name is empty")
         }
-        let Some(key) = self.key.take() else {
-            bail!("Key is empty")
-        };
 
-        Ok((self.name.take(), key))
+        Ok((self.name.take(), DidKey::try_from(self.key_str.to_owned())?))
     }
 }
 
 impl AppSection for VerificationMethodsInterface {
     fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
-        // self.map_renderer.draw_and_update(ctx, ui); // TODO
+        self.map_renderer.draw_and_update(ctx, ui);
         self.draw_input_field(ctx, ui);
     }
 }
 
 impl VerificationMethodsInterface {
-    pub fn get_map(&self) -> &HashMap<String, CryptoKey> {
+    pub fn get_map(&self) -> &HashMap<String, DidKey> {
         self.map_renderer.inner()
     }
 
@@ -52,7 +48,7 @@ impl VerificationMethodsInterface {
             ui.group(|ui| {
                 ui.vertical(|ui| {
                     ui.text_edit_singleline(&mut self.input_fields.name);
-                    self.input_fields.key.draw_and_update(ctx, ui);
+                    ui.text_edit_singleline(&mut self.input_fields.key_str);
                 });
             });
             if ui.button("Add").clicked() {
@@ -69,7 +65,16 @@ impl VerificationMethodsInterface {
         });
     }
 
-    pub fn set_map(&mut self, map: HashMap<String, CryptoKey>) {
+    pub fn set_map(&mut self, map: HashMap<String, DidKey>) {
         *self.map_renderer.inner_mut() = map;
+    }
+
+    pub fn from_map(map: HashMap<String, DidKey>) -> Self {
+        let mut map_renderer = HashMapRenderer::default();
+        *map_renderer.inner_mut() = map;
+        Self {
+            map_renderer,
+            input_fields: InputFields::default(),
+        }
     }
 }

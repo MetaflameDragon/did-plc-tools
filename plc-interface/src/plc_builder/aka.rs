@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use did_plc::AkaUri;
 use egui::Ui;
+use itertools::Itertools;
 
 use crate::app::AppSection;
 
@@ -28,5 +29,11 @@ impl AlsoKnownAsInterface {
         // self.entries_multiline = aka_uris.iter().map(|uri| uri.into()).join("\n");
 
         Ok(())
+    }
+
+    pub fn from_aka_uris(aka_uris: impl IntoIterator<Item = AkaUri>) -> Self {
+        AlsoKnownAsInterface {
+            entries_multiline: aka_uris.into_iter().map(String::from).join("\n").to_owned(),
+        }
     }
 }

@@ -144,54 +144,73 @@ impl PlcBuilderInterface {
             }
         }
 
-        self.signing_key_selector
-            .ui(ctx, ui, self.rotation_keys.keys().deref());
-
-        if ui.button("Sign operation").clicked() {
-            let plc_op = self.get_unsigned_plc_op();
-            let signing_key = self
-                .rotation_keys
-                .keys()
-                .get(self.signing_key_selector.key_index)
-                .and_then(|k| k.as_ref());
-
-            let signed_op: Result<(), _> = match plc_op {
-                Ok(plc_op) => match signing_key {
-                    None => Err(anyhow!("No signing key selected")),
-                    Some(signing_key) => {
-                        todo!()
-                        // match signing_key.keypair() {
-                        //     None => Err(anyhow!("Signing key is not owned (no private part)")),
-                        //     Some(keypair) => Ok(plc_op.sign(&keypair.secret_key())),
-                        // }
-                    }
-                },
-                Err(err) => Err(err),
-            };
-
-            match signed_op {
-                Ok(signed_op) => {
-                    todo!()
-                    // let did_plc = signed_op.get_did_plc();
-                    // let json = serde_json::ser::to_string_pretty(&signed_op)
-                    //     .unwrap_or("Failed to serialize signed plc operation".to_string());
-                    // info!("{json}");
-                    // info!("{did_plc}");
-                }
-                Err(err) => {
-                    error!("{err}");
-                }
-            }
-        }
+        // TODO
+        // self.signing_key_selector
+        //     .ui(ctx, ui, self.rotation_keys.keys().deref());
+        //
+        // if ui.button("Sign operation").clicked() {
+        //     let plc_op = self.get_unsigned_plc_op();
+        //     let signing_key = self
+        //         .rotation_keys
+        //         .keys()
+        //         .get(self.signing_key_selector.key_index)
+        //         .and_then(|k| k.as_ref());
+        //
+        //     let signed_op: Result<(), _> = match plc_op {
+        //         Ok(plc_op) => match signing_key {
+        //             None => Err(anyhow!("No signing key selected")),
+        //             Some(signing_key) => {
+        //                 todo!()
+        //                 // match signing_key.keypair() {
+        //                 //     None => Err(anyhow!("Signing key is not owned (no private part)")),
+        //                 //     Some(keypair) => Ok(plc_op.sign(&keypair.secret_key())),
+        //                 // }
+        //             }
+        //         },
+        //         Err(err) => Err(err),
+        //     };
+        //
+        //     match signed_op {
+        //         Ok(signed_op) => {
+        //             todo!()
+        //             // let did_plc = signed_op.get_did_plc();
+        //             // let json = serde_json::ser::to_string_pretty(&signed_op)
+        //             //     .unwrap_or("Failed to serialize signed plc operation".to_string());
+        //             // info!("{json}");
+        //             // info!("{did_plc}");
+        //         }
+        //         Err(err) => {
+        //             error!("{err}");
+        //         }
+        //     }
+        // }
     }
 
     fn from_plc_op(plc_op: UnsignedPlcOperation) -> Result<Self> {
-        bail!("Not implemented")
-        // self.also_known_as.set_aka_uris(plc_op.also_known_as())?;
-        // let rotation_keys = plc_op.rotation_keys().iter().map(|did_key|);
-        // self.rotation_keys.set_keys(rotation_keys);
-        // self.verification_methods
-        // Ok(())
+        let also_known_as =
+            AlsoKnownAsInterface::from_aka_uris(plc_op.also_known_as().iter().cloned());
+
+        let rotation_keys = RotationKeysInterface::from_keys(plc_op.rotation_keys().to_owned());
+
+        let verification_methods =
+            VerificationMethodsInterface::from_map(plc_op.verification_methods().clone());
+
+        let services = ServicesInterface::from_map(plc_op.services().clone());
+
+        let prev = plc_op
+            .prev()
+            .cloned()
+            .map(|cid| cid.0)
+            .unwrap_or(String::new());
+
+        Ok(Self {
+            also_known_as,
+            rotation_keys,
+            verification_methods,
+            services,
+            prev,
+            ..Default::default()
+        })
     }
 }
 

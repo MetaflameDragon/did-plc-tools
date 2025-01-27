@@ -37,6 +37,18 @@ impl ServicesInterface {
     pub fn get_map(&self) -> &HashMap<String, PlcServiceInterface> {
         self.services.inner()
     }
+
+    pub fn from_map(map: HashMap<String, PlcService>) -> Self {
+        let map = HashMap::from_iter(map.into_iter().map(|(k, v)| (k, v.into())));
+
+        let mut map_renderer = HashMapRenderer::default();
+        *map_renderer.inner_mut() = map;
+        map_renderer.allow_remove = false; // TODO: make true once an editor is implemented
+
+        Self {
+            services: map_renderer,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

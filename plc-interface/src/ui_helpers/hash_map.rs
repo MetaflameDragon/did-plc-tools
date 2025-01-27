@@ -2,7 +2,8 @@ use std::collections::HashMap;
 use std::hash::Hash;
 
 use derive_more::{Deref, DerefMut, Into};
-use egui::{Button, RichText, Ui, Widget};
+use did_key::DidKey;
+use egui::{Button, Context, RichText, Ui, Widget};
 
 use crate::app::AppSection;
 
@@ -109,5 +110,12 @@ where
         });
 
         should_remove
+    }
+}
+
+impl AppSection for DidKey {
+    fn draw_and_update(&mut self, _ctx: &Context, ui: &mut Ui) {
+        // TODO: better proper viewer
+        ui.monospace(self.formatted_value());
     }
 }

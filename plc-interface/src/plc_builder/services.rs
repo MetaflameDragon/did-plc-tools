@@ -27,7 +27,7 @@ impl AppSection for ServicesInterface {
 }
 
 impl ServicesInterface {
-    pub fn add_atproto_pds(&mut self, pds_endpoint: Url) {
+    pub fn add_atproto_pds(&mut self, pds_endpoint: String) {
         self.services.insert(
             "atproto_pds".to_string(),
             PlcService::new_atproto_pds(pds_endpoint).into(),

@@ -3,7 +3,6 @@ use std::str::FromStr;
 use ::core::default::Default;
 use eframe::{Frame, Storage};
 use egui::{Context, Ui};
-use url::Url;
 
 use crate::app::key_store::KeyStoreInterface;
 use crate::plc_builder::PlcBuilderInterface;
@@ -22,7 +21,7 @@ impl App {
         App {
             key_store: init_key_store(storage),
             plc_builder: PlcBuilderInterface::default()
-                .with_atproto_pds(Url::parse("https://pds.domain.placeholder").unwrap()),
+                .with_atproto_pds("https://pds.invalid".to_owned()),
         }
     }
 }

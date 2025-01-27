@@ -27,9 +27,15 @@ pub struct UnsignedPlcOperation {
     // Key-value map of services, services must have a type and endpoint.
     // Endpoint must be a valid http(s)-prefixed url
     // Key is currently just "atproto_pds" for type "AtprotoPersonalDataServer"
+    // TODO validate max count
+    // TODO validate ID length
+    // TODO validate service type length
+    // TODO validate endpoint length
+    // https://github.com/did-method-plc/did-method-plc/blob/main/packages/server/src/constraints.ts
     services: HashMap<String, PlcService>,
 
     // Array of at:// handles
+    // TODO prevent duplicate entries
     #[serde(rename = "alsoKnownAs")]
     also_known_as: Vec<AkaUri>,
 
@@ -38,6 +44,7 @@ pub struct UnsignedPlcOperation {
     rotation_keys: Vec<DidKey>,
 
     // Key-value map of verification methods (e.g. "atproto" & signing key)
+    // TODO validate ID length
     #[serde(rename = "verificationMethods")]
     verification_methods: HashMap<String, DidKey>,
 }

@@ -5,13 +5,12 @@ use did_plc::{AkaUri, DidPlc, PlcService, SignedPlcOperation, UnsignedPlcOperati
 use ecdsa::SigningKey;
 use k256::Secp256k1;
 use sha2::Digest;
-use url::Url;
 
 mod helpers;
 
 fn main() {
     let handle = "scalytooth.metaflame.dev";
-    let endpoint = Url::parse("https://scalytooth.metaflame.dev").expect("invalid endpoint URL");
+    let endpoint = "https://scalytooth.metaflame.dev";
     let aka_uri = AkaUri::new_at(handle).expect("Invalid URI");
 
     let mut rng = rand::rngs::OsRng;
@@ -35,7 +34,7 @@ fn main() {
         vec![aka_uri],
         HashMap::from([(
             "atproto_pds".to_string(),
-            PlcService::new_atproto_pds(endpoint),
+            PlcService::new_atproto_pds(endpoint.to_owned()),
         )]),
     )
     .unwrap();

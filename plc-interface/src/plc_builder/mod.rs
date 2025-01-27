@@ -85,7 +85,7 @@ impl PlcBuilderInterface {
         }
     }
 
-    pub fn with_atproto_pds(mut self, pds_endpoint: Url) -> Self {
+    pub fn with_atproto_pds(mut self, pds_endpoint: String) -> Self {
         self.services.add_atproto_pds(pds_endpoint);
         self
     }

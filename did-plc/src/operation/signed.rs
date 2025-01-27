@@ -10,6 +10,9 @@ use crate::did_plc::DidPlc;
 use crate::operation::unsigned::UnsignedPlcOperation;
 use crate::PlcBlessedKeyCurve;
 
+// TODO: validate dag-cbor max size to match plc.directory
+// https://github.com/did-method-plc/did-method-plc/blob/main/packages/server/src/constraints.ts
+
 /// Represents a signed PLC operation (unsigned operation + `sig`).
 ///
 /// Field order matters for `serde_json`, and matches the order
@@ -99,7 +102,6 @@ mod tests {
         let plc_op: SignedPlcOperation = serde_json::de::from_str(&plc_op_json).unwrap();
         let plc_ser = serde_json::to_string(&plc_op).unwrap();
 
-        // TODO: fails on extra forward slash in PDS endpoint
         assert_eq!(
             plc_ser,
             String::from_utf8(reserialized.buffer().to_vec()).unwrap()

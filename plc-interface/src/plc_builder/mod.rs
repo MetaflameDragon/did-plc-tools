@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use anyhow::{anyhow, Context, Result};
 use did_plc::{PlcOperationRef, PlcService, SignedPlcOperation, UnsignedPlcOperation};
-use egui::{Ui, ViewportCommand};
+use egui::{Ui, ViewportCommand, Widget};
 use log::{error, info};
 
 use crate::app::key_store::KeyStore;
@@ -210,9 +210,16 @@ impl PlcJsonLoader {
     /// - `Result::Ok(SignedPlcOperation)` if parsing was successful.
     /// - `Result::Err` with an `anyhow` error if there was an error while parsing.
     fn ui(&mut self, ui: &mut Ui) -> Option<Result<SignedPlcOperation>> {
-        if ui.button("Load from clipboard (JSON)").clicked() {
+        let button = egui::Button::new("Load from clipboard (JSON)");
+        let btn_resp = button.ui(ui);
+
+        if btn_resp.clicked() {
             ui.ctx().send_viewport_cmd(ViewportCommand::RequestPaste);
-            ui.response().request_focus();
+            btn_resp.request_focus();
+        }
+
+        if !btn_resp.has_focus() {
+            return None;
         }
 
         let clipboard = ui.input(|i| {
@@ -229,6 +236,7 @@ impl PlcJsonLoader {
             return Some(Err(anyhow!("Clipboard is empty")));
         }
 
+        btn_resp.surrender_focus();
         Some(
             serde_json::de::from_str(&clipboard).context("Failed to deserialize JSON in clipboard"),
         )

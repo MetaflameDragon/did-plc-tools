@@ -40,7 +40,7 @@ fn init_key_store(storage: Option<&dyn Storage>) -> KeyStoreInterface {
 }
 
 impl eframe::App for App {
-    fn update(&mut self, ctx: &Context, frame: &mut Frame) {
+    fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
         egui::panel::CentralPanel::default().show(ctx, |ui| {
             ui.group(|ui| {
                 ui.heading("Key Store");

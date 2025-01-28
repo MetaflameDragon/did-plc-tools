@@ -83,6 +83,7 @@ impl KeyStore {
         &self.loaded_keys
     }
 
+    #[allow(dead_code)]
     pub fn set_dir(&mut self, dir_str: impl Into<PathBuf>) {
         self.key_store_path = dir_str.into();
     }

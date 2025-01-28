@@ -2,11 +2,10 @@ use std::collections::HashMap;
 
 use anyhow::{anyhow, Context, Result};
 use did_plc::{PlcOperationRef, PlcService, SignedPlcOperation, UnsignedPlcOperation};
-use egui::{RichText, Ui, ViewportCommand};
+use egui::{Ui, ViewportCommand};
 use log::{error, info};
 
 use crate::app::key_store::KeyStore;
-use crate::app::AppSection;
 use crate::plc_builder::aka::AlsoKnownAsInterface;
 use crate::plc_builder::rotation_keys::RotationKeySetInterface;
 use crate::plc_builder::services::ServicesInterface;
@@ -28,10 +27,6 @@ pub struct PlcBuilderInterface {
 
     plc_json_loader: PlcJsonLoader,
     signing_key_selector: SigningKeySelector,
-}
-
-impl AppSection for PlcBuilderInterface {
-    fn draw_and_update(&mut self, ui: &mut Ui) {}
 }
 
 impl PlcBuilderInterface {
@@ -213,10 +208,10 @@ struct SigningKeySelector {
 }
 
 impl SigningKeySelector {
-    fn ui(&mut self, _ctx: &egui::Context, ui: &mut Ui, rotation_keys: &[CryptoKeyContainer]) {
-        let selected_key = rotation_keys.get(self.key_index);
+    fn ui(&mut self, _ctx: &egui::Context, _ui: &mut Ui, _rotation_keys: &[CryptoKeyContainer]) {
+        // let selected_key = rotation_keys.get(self.key_index);
 
-        let empty_key_text = RichText::new("[empty]").weak().italics();
+        // let empty_key_text = RichText::new("[empty]").weak().italics();
 
         // TODO
         // let selected_text = {

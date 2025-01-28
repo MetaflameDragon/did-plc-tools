@@ -82,7 +82,7 @@ impl AppSection for CryptoKeyContainer {
                         None
                     }
                 }) {
-                    if let Some(path) = &dropped_file.path {
+                    if let Some(_path) = &dropped_file.path {
                         // match CryptoKey::load_keypair(path) { // TODO
                         //     Ok(key) => {
                         //         self.key = Some(key);
@@ -117,7 +117,7 @@ impl AppSection for CryptoKeyContainer {
                             .ctx
                             .input(|state| state.key_down(egui::Key::Enter));
                     if confirm_button_resp.clicked() || user_confirmed_field {
-                        let path = Path::new(&self.load_path_buf_str);
+                        let _path = Path::new(&self.load_path_buf_str);
                         // match CryptoKey::load_keypair(path) { // TODO
                         //     Ok(key) => {
                         //         self.key = Some(key);
@@ -145,7 +145,7 @@ enum DrawKeyResponse {
     SaveKey,
 }
 
-fn draw_contained_key(key: &mut CryptoKey, ui: &mut Ui) -> Option<DrawKeyResponse> {
+fn draw_contained_key(_key: &mut CryptoKey, ui: &mut Ui) -> Option<DrawKeyResponse> {
     if ui.button("X").clicked() {
         return Some(DrawKeyResponse::DeleteKey);
     }

@@ -4,7 +4,6 @@ use std::iter;
 use did_plc::{AkaUri, DidPlc, PlcService, SignedPlcOperation, UnsignedPlcOperation};
 use ecdsa::SigningKey;
 use k256::Secp256k1;
-use sha2::Digest;
 
 mod helpers;
 

@@ -4,13 +4,14 @@ use std::fmt::Display;
 use cid::multihash::Multihash;
 use cid::{multihash, Cid};
 use derive_more::Into;
-use multibase::Base;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_ipld_dagcbor::EncodeError;
 use sha2::Digest;
 use thiserror::Error;
 
-use crate::plc_operation_ref::codes::{PLC_MULTIBASE_CODEC, PLC_MULTIHASH_CODE};
+use crate::plc_operation_ref::codes::{
+    PLC_MULTIBASE_CODEC, PLC_MULTIBASE_ENCODING, PLC_MULTIHASH_CODE,
+};
 use crate::SignedPlcOperation;
 
 mod codes {
@@ -46,11 +47,11 @@ pub enum Error {
     #[error("Invalid CID multihash (must be sha-256, 0x12; was `{0}`)")]
     InvalidMultihash(u64),
     #[error(transparent)]
-    CidError(#[from] cid::Error),
+    Cid(#[from] cid::Error),
     #[error(transparent)]
-    EncodeError(#[from] EncodeError<TryReserveError>),
+    Encode(#[from] EncodeError<TryReserveError>),
     #[error(transparent)]
-    MultihashError(#[from] multihash::Error),
+    Multihash(#[from] multihash::Error),
 }
 
 fn validate_cid(cid: &Cid) -> Result<(), Error> {
@@ -86,7 +87,7 @@ impl Display for PlcOperationRef {
         // The string conversion fails for CIDv0 if the base isn't the only supported Base58Btc
         let str = &self
             .0
-            .to_string_of_base(Base::Base32Lower)
+            .to_string_of_base(PLC_MULTIBASE_ENCODING)
             .expect("Unexpected serialization error");
         f.write_str(str)
     }

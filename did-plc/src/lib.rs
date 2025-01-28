@@ -1,7 +1,5 @@
 #![feature(never_type)]
 #![feature(assert_matches)]
-#[macro_use]
-extern crate derive_getters;
 use std::fs;
 use std::ops::Add;
 use std::path::Path;
@@ -11,12 +9,11 @@ use ecdsa::hazmat::SignPrimitive;
 use ecdsa::signature::digest::generic_array::ArrayLength;
 use ecdsa::signature::rand_core::CryptoRngCore;
 use ecdsa::signature::Signer;
-use ecdsa::{Signature, SignatureEncoding, SigningKey};
+use ecdsa::{Signature, SigningKey};
 use elliptic_curve::pkcs8::{DecodePrivateKey, EncodePrivateKey, LineEnding};
 use elliptic_curve::{CurveArithmetic, PrimeCurve, PublicKey};
 use k256::Secp256k1;
 use p256::NistP256;
-use sha2::Digest;
 
 mod aka_uri;
 mod did_plc;

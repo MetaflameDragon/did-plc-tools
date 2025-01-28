@@ -29,7 +29,7 @@ impl RotationKeySetInterface {
             let loaded_keys: Vec<_> = keystore.keys().iter().map(|k| k.as_did_key()).collect();
 
             enum RotKey {
-                Invalid(String),
+                Invalid,
                 NotOwned(DidKey),
                 Owned(DidKey),
             }
@@ -44,7 +44,7 @@ impl RotationKeySetInterface {
                                 RotKey::NotOwned(key)
                             }
                         } else {
-                            RotKey::Invalid(rot_key_str.clone())
+                            RotKey::Invalid
                         }
                     };
 
@@ -56,7 +56,7 @@ impl RotationKeySetInterface {
 
                     let mut key_field = TextEdit::singleline(rot_key_str);
                     key_field = match &rot_key {
-                        RotKey::Invalid(_) => key_field.text_color(Color32::DARK_RED),
+                        RotKey::Invalid => key_field.text_color(Color32::DARK_RED),
                         RotKey::NotOwned(_) => key_field.text_color(Color32::LIGHT_GRAY),
                         RotKey::Owned(_) => key_field.text_color(Color32::DARK_GREEN),
                     };

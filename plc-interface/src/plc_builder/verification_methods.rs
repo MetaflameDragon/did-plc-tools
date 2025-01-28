@@ -61,10 +61,6 @@ impl VerificationMethodsInterface {
         });
     }
 
-    pub fn set_map(&mut self, map: HashMap<String, DidKey>) {
-        *self.map_renderer.inner_mut() = map;
-    }
-
     pub fn from_map(map: HashMap<String, DidKey>) -> Self {
         let mut map_renderer = HashMapRenderer::default();
         *map_renderer.inner_mut() = map;

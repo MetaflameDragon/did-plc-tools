@@ -1,12 +1,9 @@
 use std::collections::HashMap;
-use std::ops::Deref;
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{anyhow, Context, Result};
 use did_plc::{PlcOperationRef, PlcService, SignedPlcOperation, UnsignedPlcOperation};
 use egui::{RichText, Ui, ViewportCommand};
 use log::{error, info};
-use serde_json::to_string;
-use url::Url;
 
 use crate::app::key_store::KeyStore;
 use crate::app::AppSection;

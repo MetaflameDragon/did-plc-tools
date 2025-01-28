@@ -34,7 +34,7 @@ impl RotationKeySetInterface {
                 Owned(DidKey),
             }
 
-            for mut rot_key_str in &mut self.rotation_keys {
+            for rot_key_str in &mut self.rotation_keys {
                 ui.horizontal(|ui| {
                     let rot_key = {
                         if let Ok(key) = DidKey::try_from(rot_key_str.clone()) {
@@ -71,7 +71,7 @@ impl RotationKeySetInterface {
         self.rotation_keys
             .iter()
             .cloned()
-            .map(|rot_keys| DidKey::try_from(rot_keys))
+            .map(DidKey::try_from)
             .map(|res| res.context("Failed to parse did:key"))
             .collect::<Result<Vec<_>>>()
     }

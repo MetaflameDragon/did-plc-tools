@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use ::core::default::Default;
 use eframe::{Frame, Storage};
 use egui::{Context, Ui};
@@ -48,7 +46,7 @@ impl eframe::App for App {
                 ui.heading("Key Store");
                 self.keystore.ui(ui);
             });
-            self.plc_builder.ui(ui, &self.keystore.keystore())
+            self.plc_builder.ui(ui, self.keystore.keystore())
         });
     }
 }

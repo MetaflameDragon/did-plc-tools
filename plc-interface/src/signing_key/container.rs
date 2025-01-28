@@ -40,7 +40,7 @@ impl AppSection for CryptoKeyContainer {
                     }
                     #[allow(unreachable_code)]
                     Some(DrawKeyResponse::SaveKey) => {
-                        let did_key = /*key.as_did_key()*/ todo!();
+                        todo!();
                         // let did_key_name = did_key.formatted_value().replace(":", "_");
                         // let path = format!("{did_key_name}.secp256k1.priv");
                         // let path = PathBuf::from(path);

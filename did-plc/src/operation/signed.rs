@@ -101,7 +101,7 @@ mod tests {
 
         serde_transcode::transcode(&mut de_json, &mut ser_json).unwrap();
 
-        let plc_op: SignedPlcOperation = serde_json::de::from_str(&plc_op_json).unwrap();
+        let plc_op: SignedPlcOperation = serde_json::de::from_str(plc_op_json).unwrap();
         let plc_ser = serde_json::to_string(&plc_op).unwrap();
 
         assert_eq!(

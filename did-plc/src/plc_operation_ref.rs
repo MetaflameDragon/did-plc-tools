@@ -3,7 +3,7 @@ use std::fmt::Display;
 
 use cid::multihash::Multihash;
 use cid::{multihash, Cid};
-use derive_more::{Deref, From, Into};
+use derive_more::Into;
 use multibase::Base;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde_ipld_dagcbor::EncodeError;
@@ -142,7 +142,7 @@ impl PlcOperationRef {
     }
 
     pub fn from_dag_cbor(bytes: &[u8]) -> Result<PlcOperationRef, Error> {
-        let digest = sha2::Sha256::digest(&bytes);
+        let digest = sha2::Sha256::digest(bytes);
         let hash = Multihash::<64>::wrap(PLC_MULTIHASH_CODE, &digest)?;
 
         Self::new(hash)

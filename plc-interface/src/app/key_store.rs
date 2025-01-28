@@ -1,11 +1,11 @@
+use std::fs;
 use std::path::{Path, PathBuf};
-use std::{fs, iter};
 
 use derive_more::Display;
 use derive_new::new;
 use did_plc::{PlcBlessedSigningKey, PlcBlessedSigningKeyBox};
 use ecdsa::SigningKey;
-use egui::{Button, CollapsingHeader, Color32, Modal, Response, RichText, Ui};
+use egui::{CollapsingHeader, Color32, Modal, RichText, Ui};
 use k256::Secp256k1;
 use log::{error, info};
 use p256::NistP256;
@@ -184,7 +184,7 @@ impl KeyGeneratorInterface {
                 KeyType::NistP256 => SigningKey::<NistP256>::new_random(&mut rng).into(),
             };
 
-            let key_path = key_store_path.join(key.as_did_key().multibase_value().to_owned());
+            let key_path = key_store_path.join(key.as_did_key().multibase_value());
 
             info!("Saving key to {}", key_path.display());
             if let Err(err) = key.write_to_file(&key_path) {

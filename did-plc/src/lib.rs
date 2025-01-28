@@ -85,7 +85,7 @@ where
     }
 
     fn read_from_file(path: &Path) -> std::io::Result<PlcBlessedSigningKeyBox> {
-        let key = Self::read_pkcs8_pem_file(path).map_err(|err| std::io::Error::other(err))?;
+        let key = Self::read_pkcs8_pem_file(path).map_err(std::io::Error::other)?;
 
         Ok(PlcBlessedSigningKeyBox::from(key))
     }
@@ -114,12 +114,10 @@ impl PlcBlessedSigningKeyBox {
 
         let match_funcs = [
             |str: &str| {
-                SigningKey::<Secp256k1>::from_pkcs8_pem(str)
-                    .map(|key| PlcBlessedSigningKeyBox::from(key))
+                SigningKey::<Secp256k1>::from_pkcs8_pem(str).map(PlcBlessedSigningKeyBox::from)
             },
             |str: &str| {
-                SigningKey::<NistP256>::from_pkcs8_pem(str)
-                    .map(|key| PlcBlessedSigningKeyBox::from(key))
+                SigningKey::<NistP256>::from_pkcs8_pem(str).map(PlcBlessedSigningKeyBox::from)
             },
         ];
 

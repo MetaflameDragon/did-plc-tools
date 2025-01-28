@@ -79,6 +79,10 @@ pub struct KeyStore {
 }
 
 impl KeyStore {
+    pub fn keys(&self) -> &[PlcBlessedSigningKeyBox] {
+        &self.loaded_keys
+    }
+
     pub fn set_dir(&mut self, dir_str: impl Into<PathBuf>) {
         self.key_store_path = dir_str.into();
     }

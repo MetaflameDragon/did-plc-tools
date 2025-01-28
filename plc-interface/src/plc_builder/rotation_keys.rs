@@ -1,7 +1,6 @@
 use anyhow::{Context, Result};
-use derive_new::new;
 use did_key::DidKey;
-use egui::{Ui, Widget};
+use egui::{Color32, TextEdit, Ui, Widget};
 
 use crate::app::key_store::KeyStore;
 
@@ -9,7 +8,9 @@ const ROTATION_KEY_COUNT_MAX: usize = 5;
 
 #[derive(Clone, Debug)]
 pub struct RotationKeySetInterface {
-    rotation_keys: Vec<RotationKeyInterface>,
+    rotation_keys: Vec<String>,
+    /// The selected key may have a stale value (referencing a removed or no-longer-owned key),
+    /// always make sure to validate against owned and included rotation keys
     selected_key: Option<DidKey>,
 }
 
@@ -25,8 +26,43 @@ impl Default for RotationKeySetInterface {
 impl RotationKeySetInterface {
     pub fn ui(&mut self, ui: &mut Ui, keystore: &KeyStore) {
         ui.vertical(|ui| {
-            for key_interface in &mut self.rotation_keys {
-                key_interface.ui(ui, false);
+            let loaded_keys: Vec<_> = keystore.keys().iter().map(|k| k.as_did_key()).collect();
+
+            enum RotKey {
+                Invalid(String),
+                NotOwned(DidKey),
+                Owned(DidKey),
+            }
+
+            for mut rot_key_str in &mut self.rotation_keys {
+                ui.horizontal(|ui| {
+                    let rot_key = {
+                        if let Ok(key) = DidKey::try_from(rot_key_str.clone()) {
+                            if loaded_keys.contains(&key) {
+                                RotKey::Owned(key)
+                            } else {
+                                RotKey::NotOwned(key)
+                            }
+                        } else {
+                            RotKey::Invalid(rot_key_str.clone())
+                        }
+                    };
+
+                    if let RotKey::Owned(key) = &rot_key {
+                        ui.radio_value(&mut self.selected_key, Some(key.clone()), "")
+                    } else {
+                        ui.add_enabled_ui(false, |ui| ui.radio(false, "")).inner
+                    };
+
+                    let mut key_field = TextEdit::singleline(rot_key_str);
+                    key_field = match &rot_key {
+                        RotKey::Invalid(_) => key_field.text_color(Color32::DARK_RED),
+                        RotKey::NotOwned(_) => key_field.text_color(Color32::LIGHT_GRAY),
+                        RotKey::Owned(_) => key_field.text_color(Color32::DARK_GREEN),
+                    };
+
+                    key_field.ui(ui);
+                });
             }
         });
     }
@@ -35,7 +71,7 @@ impl RotationKeySetInterface {
         self.rotation_keys
             .iter()
             .cloned()
-            .filter_map(|key_interface| key_interface.try_get_key())
+            .map(|rot_keys| DidKey::try_from(rot_keys))
             .map(|res| res.context("Failed to parse did:key"))
             .collect::<Result<Vec<_>>>()
     }
@@ -51,38 +87,8 @@ impl RotationKeySetInterface {
         }
 
         Self {
-            rotation_keys: keys_str
-                .into_iter()
-                .map(|str| RotationKeyInterface::new(str))
-                .collect(),
+            rotation_keys: keys_str.into_iter().collect(),
             selected_key: None,
         }
-    }
-}
-
-#[derive(Debug, Default, Clone, new)]
-struct RotationKeyInterface {
-    key_str: String,
-}
-
-impl RotationKeyInterface {
-    pub fn try_get_key(&self) -> Option<Result<DidKey, did_key::Error>> {
-        if self.key_str.is_empty() {
-            None
-        } else {
-            Some(DidKey::try_from(self.key_str.clone()))
-        }
-    }
-
-    pub fn ui(&mut self, ui: &mut Ui, is_selected: bool) -> bool {
-        ui.horizontal(|ui| {
-            let radio = egui::RadioButton::new(is_selected, "");
-            let radio_resp = radio.ui(ui);
-
-            ui.text_edit_singleline(&mut self.key_str);
-
-            radio_resp.clicked()
-        })
-        .inner
     }
 }

@@ -185,18 +185,23 @@ impl KeyGeneratorInterface {
                 KeyType::NistP256 => SigningKey::<NistP256>::new_random(&mut rng).into(),
             };
 
-            let key_path = key_store_path.join(key.as_did_key().multibase_value());
-
-            info!("Saving key to {}", key_path.display());
-            if let Err(err) = key.write_to_file(&key_path) {
-                error!("Failed to save key: {}", err);
-            } else {
-                self.modal_open = false;
-
-                return Some(key);
+            match Self::save_key(&key, &key_store_path) {
+                Ok(()) => {
+                    self.modal_open = false;
+                    return Some(key);
+                }
+                Err(err) => {
+                    error!("Failed to save key: {err}")
+                }
             }
         };
 
         None
+    }
+
+    fn save_key(key: &PlcBlessedSigningKeyBox, key_store_path: &Path) -> std::io::Result<()> {
+        let key_path = key_store_path.join(key.as_did_key().multibase_value());
+        info!("Saving key to {}", key_path.display());
+        key.write_to_file(&key_path)
     }
 }

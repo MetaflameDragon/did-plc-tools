@@ -4,7 +4,6 @@ extern crate core;
 
 mod app;
 mod plc_builder;
-mod signing_key;
 mod ui_helpers;
 
 #[cfg(not(target_arch = "wasm32"))]

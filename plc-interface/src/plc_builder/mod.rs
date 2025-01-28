@@ -10,7 +10,6 @@ use crate::plc_builder::aka::AlsoKnownAsInterface;
 use crate::plc_builder::rotation_keys::RotationKeySetInterface;
 use crate::plc_builder::services::ServicesInterface;
 use crate::plc_builder::verification_methods::VerificationMethodsInterface;
-use crate::signing_key::CryptoKeyContainer;
 
 mod aka;
 mod rotation_keys;
@@ -26,7 +25,6 @@ pub struct PlcBuilderInterface {
     prev: Option<PlcOperationRef>,
 
     plc_json_loader: PlcJsonLoader,
-    signing_key_selector: SigningKeySelector,
 }
 
 impl PlcBuilderInterface {
@@ -199,50 +197,6 @@ impl PlcBuilderInterface {
             prev,
             ..Default::default()
         })
-    }
-}
-
-#[derive(Default, Clone, Debug)]
-struct SigningKeySelector {
-    pub key_index: usize,
-}
-
-impl SigningKeySelector {
-    fn ui(&mut self, _ctx: &egui::Context, _ui: &mut Ui, _rotation_keys: &[CryptoKeyContainer]) {
-        // let selected_key = rotation_keys.get(self.key_index);
-
-        // let empty_key_text = RichText::new("[empty]").weak().italics();
-
-        // TODO
-        // let selected_text = {
-        //     match selected_key.map(|k| k.try_get_did_key()).flatten() {
-        //         None => empty_key_text.clone(),
-        //         Some(k) => {
-        //             let val = k.multibase_value();
-        //             let lead_char_count = 6;
-        //             let tail_char_count = 3;
-        //             // Show only a truncated version of the value
-        //             RichText::new(format!(
-        //                 "{}...{}",
-        //                 val[..lead_char_count].to_string(),
-        //                 val[val.len() - tail_char_count..].to_string()
-        //             ))
-        //         }
-        //     }
-        // };
-        //
-        // egui::ComboBox::from_label("Signing key")
-        //     .selected_text(selected_text)
-        //     .show_ui(ui, |ui| {
-        //         for (i, key_container) in rotation_keys.iter().enumerate() {
-        //             let label = key_container
-        //                 .try_get_did_key()
-        //                 .map_or(empty_key_text.clone(), |k| {
-        //                     RichText::new(k.multibase_value())
-        //                 });
-        //             ui.selectable_value(&mut self.key_index, i, label);
-        //         }
-        //     });
     }
 }
 

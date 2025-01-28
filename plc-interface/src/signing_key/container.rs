@@ -29,11 +29,11 @@ impl CryptoKeyContainer {
 }
 
 impl AppSection for CryptoKeyContainer {
-    fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
+    fn draw_and_update(&mut self, ui: &mut Ui) {
         ui.horizontal(|ui| {
             if let Some(ref mut key) = self.key {
                 // Draw contained key
-                match draw_contained_key(key, ctx, ui) {
+                match draw_contained_key(key, ui) {
                     None => {}
                     Some(DrawKeyResponse::DeleteKey) => {
                         self.key = None;
@@ -67,6 +67,7 @@ impl AppSection for CryptoKeyContainer {
 
                 // Check for dropped file, set key if the cursor is hovering over this area
                 let interact_rect = ui.response().interact_rect;
+                let ctx = ui.ctx();
                 if let Some(dropped_file) = ctx.input(|i| {
                     let Some(file) = i.raw.dropped_files.first() else {
                         return None;
@@ -96,6 +97,7 @@ impl AppSection for CryptoKeyContainer {
                 }
             }
         });
+        let ctx = ui.ctx();
 
         if self.is_load_modal_open {
             let modal = Modal::new(egui::Id::new("Key Load Modal")).show(ctx, |ui| {
@@ -143,11 +145,7 @@ enum DrawKeyResponse {
     SaveKey,
 }
 
-fn draw_contained_key(
-    key: &mut CryptoKey,
-    ctx: &egui::Context,
-    ui: &mut Ui,
-) -> Option<DrawKeyResponse> {
+fn draw_contained_key(key: &mut CryptoKey, ui: &mut Ui) -> Option<DrawKeyResponse> {
     if ui.button("X").clicked() {
         return Some(DrawKeyResponse::DeleteKey);
     }

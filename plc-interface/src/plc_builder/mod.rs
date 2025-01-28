@@ -8,9 +8,10 @@ use log::{error, info};
 use serde_json::to_string;
 use url::Url;
 
+use crate::app::key_store::KeyStore;
 use crate::app::AppSection;
 use crate::plc_builder::aka::AlsoKnownAsInterface;
-use crate::plc_builder::rotation_keys::RotationKeysInterface;
+use crate::plc_builder::rotation_keys::RotationKeySetInterface;
 use crate::plc_builder::services::ServicesInterface;
 use crate::plc_builder::verification_methods::VerificationMethodsInterface;
 use crate::signing_key::CryptoKeyContainer;
@@ -23,7 +24,7 @@ mod verification_methods;
 #[derive(Default, Clone, Debug)]
 pub struct PlcBuilderInterface {
     also_known_as: AlsoKnownAsInterface,
-    rotation_keys: RotationKeysInterface,
+    rotation_keys: RotationKeySetInterface,
     verification_methods: VerificationMethodsInterface,
     services: ServicesInterface,
     prev: Option<PlcOperationRef>,
@@ -33,21 +34,25 @@ pub struct PlcBuilderInterface {
 }
 
 impl AppSection for PlcBuilderInterface {
-    fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
+    fn draw_and_update(&mut self, ui: &mut Ui) {}
+}
+
+impl PlcBuilderInterface {
+    pub fn ui(&mut self, ui: &mut Ui, keystore: &KeyStore) {
         ui.vertical(|ui| {
-            self.draw_plc_loader_interface(ctx, ui);
+            self.draw_plc_loader_interface(ui);
 
             ui.heading("Also known as:");
-            self.also_known_as.draw_and_update(ctx, ui);
+            self.also_known_as.ui(ui);
 
             ui.heading("Rotation keys:");
-            self.rotation_keys.draw_and_update(ctx, ui);
+            self.rotation_keys.ui(ui, keystore);
 
             ui.heading("Verification methods:");
-            self.verification_methods.draw_and_update(ctx, ui);
+            self.verification_methods.ui(ui);
 
             ui.heading("Services:");
-            self.services.draw_and_update(ctx, ui);
+            self.services.ui(ui);
 
             ui.heading("Previous CID:");
             ui.label(
@@ -56,14 +61,12 @@ impl AppSection for PlcBuilderInterface {
                     .unwrap_or("".to_owned()),
             );
 
-            ui.group(|ui| self.draw_action_column(ctx, ui));
+            ui.group(|ui| self.draw_action_column(ui));
         });
     }
-}
 
-impl PlcBuilderInterface {
-    fn draw_plc_loader_interface(&mut self, ctx: &egui::Context, ui: &mut Ui) {
-        let plc_op = match self.plc_json_loader.ui(ctx, ui) {
+    fn draw_plc_loader_interface(&mut self, ui: &mut Ui) {
+        let plc_op = match self.plc_json_loader.ui(ui) {
             None => None,
             Some(Ok(plc_op)) => {
                 info!("Loading plc json: {:?}", plc_op);
@@ -118,7 +121,7 @@ impl PlcBuilderInterface {
         )?)
     }
 
-    fn draw_action_column(&mut self, ctx: &egui::Context, ui: &mut Ui) {
+    fn draw_action_column(&mut self, ui: &mut Ui) {
         if ui.button("Print unsigned PLC Operation JSON").clicked() {
             let plc_op = self.get_unsigned_plc_op();
             match plc_op {
@@ -187,7 +190,7 @@ impl PlcBuilderInterface {
         let also_known_as =
             AlsoKnownAsInterface::from_aka_uris(plc_op.also_known_as().iter().cloned());
 
-        let rotation_keys = RotationKeysInterface::from_keys(plc_op.rotation_keys().to_owned());
+        let rotation_keys = RotationKeySetInterface::from_keys(plc_op.rotation_keys().to_owned());
 
         let verification_methods =
             VerificationMethodsInterface::from_map(plc_op.verification_methods().clone());
@@ -260,7 +263,7 @@ impl PlcJsonLoader {
     /// Returns `Some(Result)` when the user attempts to parse a PLC operation.
     /// - `Result::Ok(SignedPlcOperation)` if parsing was successful.
     /// - `Result::Err` with an `anyhow` error if there was an error while parsing.
-    fn ui(&mut self, ctx: &egui::Context, ui: &mut Ui) -> Option<Result<SignedPlcOperation>> {
+    fn ui(&mut self, ui: &mut Ui) -> Option<Result<SignedPlcOperation>> {
         if ui.button("Load from clipboard (JSON)").clicked() {
             ui.ctx().send_viewport_cmd(ViewportCommand::RequestPaste);
             ui.response().request_focus();

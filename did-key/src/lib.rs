@@ -2,4 +2,4 @@
 
 mod did_key;
 
-pub use did_key::DidKey;
+pub use did_key::{DidKey, Error};

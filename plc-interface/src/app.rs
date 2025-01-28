@@ -7,10 +7,10 @@ use egui::{Context, Ui};
 use crate::app::key_store::KeyStoreInterface;
 use crate::plc_builder::PlcBuilderInterface;
 
-mod key_store;
+pub mod key_store;
 
 pub struct App {
-    key_store: KeyStoreInterface,
+    keystore: KeyStoreInterface,
     plc_builder: PlcBuilderInterface,
 }
 
@@ -19,7 +19,7 @@ impl App {
         let storage = cc.storage;
 
         App {
-            key_store: init_key_store(storage),
+            keystore: init_key_store(storage),
             plc_builder: PlcBuilderInterface::default()
                 .with_atproto_pds("https://pds.invalid".to_owned()),
         }
@@ -46,13 +46,13 @@ impl eframe::App for App {
         egui::panel::CentralPanel::default().show(ctx, |ui| {
             ui.group(|ui| {
                 ui.heading("Key Store");
-                self.key_store.ui(ui);
+                self.keystore.ui(ui);
             });
-            self.plc_builder.draw_and_update(ctx, ui)
+            self.plc_builder.ui(ui, &self.keystore.keystore())
         });
     }
 }
 
 pub trait AppSection {
-    fn draw_and_update(&mut self, ctx: &Context, ui: &mut Ui); // TODO: return InnerResponse
+    fn draw_and_update(&mut self, ui: &mut Ui); // TODO: return InnerResponse
 }

@@ -3,20 +3,16 @@ use did_plc::AkaUri;
 use egui::Ui;
 use itertools::Itertools;
 
-use crate::app::AppSection;
-
 #[derive(Debug, Default, Clone)]
 pub struct AlsoKnownAsInterface {
     entries_multiline: String,
 }
 
-impl AppSection for AlsoKnownAsInterface {
-    fn draw_and_update(&mut self, _ctx: &egui::Context, ui: &mut Ui) {
+impl AlsoKnownAsInterface {
+    pub fn ui(&mut self, ui: &mut Ui) {
         ui.text_edit_multiline(&mut self.entries_multiline);
     }
-}
 
-impl AlsoKnownAsInterface {
     pub fn get_aka_uris(&self) -> Result<Vec<AkaUri>> {
         self.entries_multiline
             .lines()

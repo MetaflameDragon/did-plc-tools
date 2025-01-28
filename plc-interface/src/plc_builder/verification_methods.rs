@@ -31,19 +31,17 @@ impl InputFields {
     }
 }
 
-impl AppSection for VerificationMethodsInterface {
-    fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
-        self.map_renderer.draw_and_update(ctx, ui);
-        self.draw_input_field(ctx, ui);
-    }
-}
-
 impl VerificationMethodsInterface {
+    pub fn ui(&mut self, ui: &mut Ui) {
+        self.map_renderer.ui(ui);
+        self.draw_input_field(ui);
+    }
+
     pub fn get_map(&self) -> &HashMap<String, DidKey> {
         self.map_renderer.inner()
     }
 
-    fn draw_input_field(&mut self, ctx: &egui::Context, ui: &mut Ui) {
+    fn draw_input_field(&mut self, ui: &mut Ui) {
         ui.vertical(|ui| {
             ui.group(|ui| {
                 ui.vertical(|ui| {

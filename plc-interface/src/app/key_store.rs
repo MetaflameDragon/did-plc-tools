@@ -17,6 +17,10 @@ pub struct KeyStoreInterface {
 }
 
 impl KeyStoreInterface {
+    pub fn keystore(&self) -> &KeyStore {
+        &self.store
+    }
+
     pub fn new(key_store_dir_str: String) -> Self {
         let mut store = KeyStore::new(key_store_dir_str.clone());
         store.refresh();
@@ -67,7 +71,7 @@ impl KeyStoreInterface {
 }
 
 #[derive(new)]
-struct KeyStore {
+pub struct KeyStore {
     #[new(into)]
     key_store_path: PathBuf,
     #[new(default)]

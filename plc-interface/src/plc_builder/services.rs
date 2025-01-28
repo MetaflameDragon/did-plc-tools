@@ -19,13 +19,11 @@ impl Default for ServicesInterface {
     }
 }
 
-impl AppSection for ServicesInterface {
-    fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
-        self.services.draw_and_update(ctx, ui);
-    }
-}
-
 impl ServicesInterface {
+    pub fn ui(&mut self, ui: &mut Ui) {
+        self.services.ui(ui);
+    }
+
     pub fn add_atproto_pds(&mut self, pds_endpoint: String) {
         self.services.insert(
             "atproto_pds".to_string(),
@@ -77,7 +75,7 @@ impl TryInto<PlcService> for PlcServiceInterface {
 }
 
 impl AppSection for PlcServiceInterface {
-    fn draw_and_update(&mut self, ctx: &egui::Context, ui: &mut Ui) {
+    fn draw_and_update(&mut self, ui: &mut Ui) {
         ui.vertical(|ui| {
             ui.label(RichText::new(&self.r#type).italics().weak());
 

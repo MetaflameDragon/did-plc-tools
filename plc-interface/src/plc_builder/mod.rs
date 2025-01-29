@@ -141,6 +141,29 @@ impl PlcBuilderInterface {
                 error!("Selected key is not in key store");
                 return;
             };
+            let unsigned_op = match self.get_unsigned_plc_op() {
+                Ok(plc_op) => plc_op,
+                Err(err) => {
+                    error!("Error getting PLC operation:");
+
+                    for err in err.chain().take(3) {
+                        error!("{}", err);
+                    }
+                    return;
+                }
+            };
+
+            let signed_op = signing_key.sign_plc_op(unsigned_op);
+
+            let result = match serde_json::ser::to_string_pretty(&signed_op) {
+                Ok(res) => res,
+                Err(err) => {
+                    error!("Error serializing signed PLC operation: {err}");
+                    return;
+                }
+            };
+
+            info!("Signed PLC operation:\n{result}");
         }
     }
 

@@ -37,6 +37,8 @@ impl PlcBlessedKeyCurve for Secp256k1 {}
 
 pub trait PlcBlessedSigningKey {
     fn sign_to_bytes(&self, bytes: &[u8]) -> Vec<u8>;
+
+    fn sign_plc_op(&self, unsigned_op: UnsignedPlcOperation) -> SignedPlcOperation;
     fn new_random(rng: &mut impl CryptoRngCore) -> Self
     where
         Self: Sized;
@@ -64,6 +66,10 @@ where
     fn sign_to_bytes(&self, bytes: &[u8]) -> Vec<u8> {
         let signature: Signature<_> = Signer::sign(self, bytes);
         signature.to_bytes().as_ref().to_vec()
+    }
+
+    fn sign_plc_op(&self, unsigned_op: UnsignedPlcOperation) -> SignedPlcOperation {
+        unsigned_op.sign(self)
     }
 
     fn new_random(rng: &mut impl CryptoRngCore) -> Self {

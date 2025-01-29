@@ -70,6 +70,7 @@ impl RotationKeySetInterface {
         self.rotation_keys
             .iter()
             .cloned()
+            .filter(|k| !k.is_empty())
             .map(DidKey::try_from)
             .map(|res| res.context("Failed to parse did:key"))
             .collect::<Result<Vec<_>>>()

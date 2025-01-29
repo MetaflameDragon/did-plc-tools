@@ -111,6 +111,10 @@ impl UnsignedPlcOperation {
     pub fn prev(&self) -> Option<PlcOperationRef> {
         self.prev // Copiable
     }
+
+    pub fn is_genesis(&self) -> bool {
+        self.prev.is_none()
+    }
 }
 
 #[cfg(test)]

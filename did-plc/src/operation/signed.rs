@@ -55,7 +55,6 @@ impl SignedPlcOperation {
     }
 
     pub fn get_did_plc(&self) -> DidPlc {
-        // TODO: Limit to genesis op?
         DidPlc::from_signed_op(self)
     }
 

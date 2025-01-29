@@ -45,6 +45,10 @@ impl PlcBuilderInterface {
                 }
             }
 
+            if ui.button("Reset all fields").clicked() {
+                *self = Self::new_with_defaults()
+            }
+
             ui.heading("Also known as:");
             self.also_known_as.ui(ui);
 
@@ -229,6 +233,10 @@ impl PlcBuilderInterface {
             prev,
             ..Default::default()
         })
+    }
+
+    pub fn new_with_defaults() -> Self {
+        PlcBuilderInterface::default().with_atproto_pds("https://pds.invalid".to_owned())
     }
 }
 

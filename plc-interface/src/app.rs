@@ -18,8 +18,7 @@ impl App {
 
         App {
             keystore: init_key_store(storage),
-            plc_builder: PlcBuilderInterface::default()
-                .with_atproto_pds("https://pds.invalid".to_owned()),
+            plc_builder: PlcBuilderInterface::new_with_defaults(), // has default PDS
         }
     }
 }

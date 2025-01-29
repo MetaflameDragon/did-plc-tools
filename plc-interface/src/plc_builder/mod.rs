@@ -196,6 +196,10 @@ impl PlcBuilderInterface {
             };
 
             info!("Signed PLC operation:\n{result}");
+            info!("Identifier: {}", signed_op.get_did_plc());
+            if signed_op.prev().is_some() {
+                info!("(Note: this is not a genesis operation! You may need the genesis did:plc instead.)");
+            }
         }
     }
 

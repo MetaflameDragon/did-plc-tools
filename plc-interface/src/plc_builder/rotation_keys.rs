@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use did_key::DidKey;
 use egui::{Color32, TextEdit, Ui, Widget};
+use itertools::Itertools;
 
 use crate::app::key_store::KeyStore;
 
@@ -9,8 +10,6 @@ const ROTATION_KEY_COUNT_MAX: usize = 5;
 #[derive(Clone, Debug)]
 pub struct RotationKeySetInterface {
     rotation_keys: Vec<String>,
-    /// The selected key may have a stale value (referencing a removed or no-longer-owned key),
-    /// always make sure to validate against owned and included rotation keys
     selected_key: Option<DidKey>,
 }
 
@@ -90,5 +89,20 @@ impl RotationKeySetInterface {
             rotation_keys: keys_str.into_iter().collect(),
             selected_key: None,
         }
+    }
+
+    pub fn contains(&self, key: &DidKey) -> bool {
+        self.rotation_keys
+            .iter()
+            .cloned()
+            .contains(key.formatted_value())
+    }
+
+    /// Returns a reference to the selected signing key
+    ///
+    /// The selected key may have a stale value (referencing a removed or no-longer-owned key),
+    /// always make sure to validate against owned and included rotation keys
+    pub fn try_get_selected_key(&self) -> Option<&DidKey> {
+        self.selected_key.as_ref()
     }
 }

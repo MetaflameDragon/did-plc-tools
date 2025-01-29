@@ -3,9 +3,11 @@ use std::path::{Path, PathBuf};
 
 use derive_more::Display;
 use derive_new::new;
+use did_key::DidKey;
 use did_plc::{PlcBlessedSigningKey, PlcBlessedSigningKeyBox};
 use ecdsa::SigningKey;
 use egui::{CollapsingHeader, Color32, Modal, RichText, Ui};
+use itertools::Itertools;
 use k256::Secp256k1;
 use log::{error, info};
 use p256::NistP256;
@@ -81,6 +83,12 @@ pub struct KeyStore {
 impl KeyStore {
     pub fn keys(&self) -> &[PlcBlessedSigningKeyBox] {
         &self.loaded_keys
+    }
+
+    pub fn try_get_by_did_key(&self, key: &DidKey) -> Option<&PlcBlessedSigningKeyBox> {
+        self.loaded_keys
+            .iter()
+            .find(|key_box| key_box.as_did_key() == *key)
     }
 
     #[allow(dead_code)]

@@ -1,7 +1,6 @@
 use base64::engine::general_purpose::GeneralPurpose;
 use base64::engine::GeneralPurposeConfig;
 use base64::{alphabet, Engine};
-use cid::Cid;
 use derive_more::Deref;
 use ecdsa::signature::Signer;
 use ecdsa::{Signature, SignatureEncoding};
@@ -10,8 +9,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::did_plc::DidPlc;
 use crate::operation::unsigned::UnsignedPlcOperation;
-use crate::PlcBlessedKeyCurve;
-
+use crate::plc_operation_ref::Error;
+use crate::{PlcBlessedKeyCurve, PlcOperationRef};
 // TODO: validate dag-cbor max size to match plc.directory
 // https://github.com/did-method-plc/did-method-plc/blob/main/packages/server/src/constraints.ts
 
@@ -58,8 +57,8 @@ impl SignedPlcOperation {
         DidPlc::from_signed_op(self)
     }
 
-    pub fn get_cid_pointer(&self) -> Cid {
-        todo!()
+    pub fn get_cid_reference(&self) -> Result<PlcOperationRef, Error> {
+        PlcOperationRef::from_signed_op(&self)
     }
 }
 

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use anyhow::{anyhow, Context, Result};
 use did_key::DidKey;
 use did_plc::{PlcOperationRef, PlcService, SignedPlcOperation, UnsignedPlcOperation};
-use egui::{Ui, ViewportCommand, Widget};
+use egui::{RichText, Ui, ViewportCommand, Widget};
 use log::{error, info};
 
 use crate::app::key_store::KeyStore;
@@ -29,7 +29,21 @@ pub struct PlcBuilderInterface {
 impl PlcBuilderInterface {
     pub fn ui(&mut self, ui: &mut Ui, key_store: &KeyStore) {
         ui.vertical(|ui| {
-            self.draw_plc_loader_interface(ui);
+            let plc_op = self.draw_plc_loader_ui_print_errors(
+                ui,
+                "Load signed operation from clipboard (JSON) & set CID ref",
+            );
+
+            if let Some(signed_plc_op) = plc_op {
+                match Self::from_signed_plc_op_with_ref(signed_plc_op) {
+                    Ok(new) => {
+                        *self = new;
+                    }
+                    Err(err) => {
+                        error!("Failed to load PLC operation: {err}");
+                    }
+                }
+            }
 
             ui.heading("Also known as:");
             self.also_known_as.ui(ui);
@@ -44,18 +58,47 @@ impl PlcBuilderInterface {
             self.services.ui(ui);
 
             ui.heading("Previous CID:");
-            ui.label(
-                self.prev
-                    .map(|value| value.to_string())
-                    .unwrap_or("".to_owned()),
-            );
+            {
+                let text = {
+                    if let Some(value) = self.prev {
+                        RichText::new(value.to_string())
+                    } else {
+                        RichText::new("[none]".to_string()).weak().italics()
+                    }
+                };
+                ui.label(text);
+            }
+            ui.horizontal(|ui| {
+                if ui.button("Clear").clicked() {
+                    self.prev = None;
+                }
+                if let Some(plc_op) = self.draw_plc_loader_ui_print_errors(
+                    ui,
+                    "Load signed operation from clipboard (JSON) & set CID ref",
+                ) {
+                    match plc_op.get_cid_reference() {
+                        Ok(prev) => {
+                            self.prev = Some(prev);
+                        }
+                        Err(err) => {
+                            error!("Failed to get CID to PLC operation: {err}");
+                        }
+                    };
+                }
+            });
+
+            ui.add_space(20.0);
 
             ui.group(|ui| self.draw_action_column(ui, key_store));
         });
     }
 
-    fn draw_plc_loader_interface(&mut self, ui: &mut Ui) {
-        let plc_op = match plc_json_loader_ui(ui) {
+    fn draw_plc_loader_ui_print_errors(
+        &mut self,
+        ui: &mut Ui,
+        button_text: &str,
+    ) -> Option<SignedPlcOperation> {
+        match plc_json_loader_ui(ui, button_text) {
             None => None,
             Some(Ok(plc_op)) => {
                 info!("Loading plc json: {:?}", plc_op);
@@ -67,17 +110,6 @@ impl PlcBuilderInterface {
                     error!(": {}", err);
                 }
                 None
-            }
-        };
-
-        if let Some(signed_plc_op) = plc_op {
-            match Self::from_signed_plc_op_with_ref(signed_plc_op) {
-                Ok(new) => {
-                    *self = new;
-                }
-                Err(err) => {
-                    error!("Failed to load PLC operation: {err}");
-                }
             }
         }
     }
@@ -202,8 +234,8 @@ impl PlcBuilderInterface {
 /// Returns `Some(Result)` when the user attempts to parse a PLC operation.
 /// - `Result::Ok(SignedPlcOperation)` if parsing was successful.
 /// - `Result::Err` with an `anyhow` error if there was an error while parsing.
-fn plc_json_loader_ui(ui: &mut Ui) -> Option<Result<SignedPlcOperation>> {
-    let button = egui::Button::new("Load signed operation from clipboard (JSON) & set CID ref");
+fn plc_json_loader_ui(ui: &mut Ui, button_text: &str) -> Option<Result<SignedPlcOperation>> {
+    let button = egui::Button::new(button_text);
     let btn_resp = button.ui(ui);
 
     if btn_resp.clicked() {

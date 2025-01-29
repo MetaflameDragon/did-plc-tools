@@ -1,5 +1,6 @@
-use base64::engine::general_purpose::URL_SAFE as BASE64_URL_SAFE;
-use base64::Engine;
+use base64::engine::general_purpose::GeneralPurpose;
+use base64::engine::GeneralPurposeConfig;
+use base64::{alphabet, Engine};
 use cid::Cid;
 use derive_more::Deref;
 use ecdsa::signature::Signer;
@@ -39,7 +40,13 @@ impl SignedPlcOperation {
             .expect("Unsigned operation serialization failed");
 
         let signature: Signature<_> = Signer::sign(signing_key, &unsigned_op_serialized);
-        let signature_base64url = BASE64_URL_SAFE.encode(signature.to_bytes().as_ref());
+
+        // PLC Directory does not use padding (trailing '=')
+        let encoding_base64url_no_pad = GeneralPurpose::new(
+            &alphabet::URL_SAFE,
+            GeneralPurposeConfig::new().with_encode_padding(false),
+        );
+        let signature_base64url = encoding_base64url_no_pad.encode(signature.to_bytes().as_ref());
 
         SignedPlcOperation {
             inner: unsigned_op,

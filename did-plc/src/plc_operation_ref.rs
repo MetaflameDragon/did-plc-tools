@@ -173,7 +173,7 @@ mod tests {
         let prev_cid_str = "afyreieg4qrrfepem7fpnsurihrenghjjqn7ebx5kansmdizmcxsdvtfku";
         let op_ref = PlcOperationRef::try_from(prev_cid_str);
 
-        assert_matches!(op_ref, Err(Error::CidError(cid::Error::ParsingError)));
+        assert_matches!(op_ref, Err(Error::Cid(cid::Error::ParsingError)));
     }
 
     #[test]
@@ -182,7 +182,7 @@ mod tests {
         let prev_cid_str = "b8fyreieg4qrrfepem7fpnsurihrenghjjqn7ebx5kansmdizmcxsdvtfku";
         let op_ref = PlcOperationRef::try_from(prev_cid_str);
 
-        assert_matches!(op_ref, Err(Error::CidError(cid::Error::ParsingError)));
+        assert_matches!(op_ref, Err(Error::Cid(cid::Error::ParsingError)));
     }
 
     #[test]

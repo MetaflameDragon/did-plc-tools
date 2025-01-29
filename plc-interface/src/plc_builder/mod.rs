@@ -72,10 +72,9 @@ impl PlcBuilderInterface {
                 if ui.button("Clear").clicked() {
                     self.prev = None;
                 }
-                if let Some(plc_op) = self.draw_plc_loader_ui_print_errors(
-                    ui,
-                    "Load signed operation from clipboard (JSON) & set CID ref",
-                ) {
+                if let Some(plc_op) =
+                    self.draw_plc_loader_ui_print_errors(ui, "Set CID from signed PLC JSON")
+                {
                     match plc_op.get_cid_reference() {
                         Ok(prev) => {
                             self.prev = Some(prev);

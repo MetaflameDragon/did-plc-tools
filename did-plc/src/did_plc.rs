@@ -1,5 +1,6 @@
 use std::fmt::{Debug, Display, Formatter};
 
+use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use thiserror::Error;
 
@@ -13,7 +14,8 @@ const PLC_HASH_BYTE_COUNT: usize = usize::div_ceil(PLC_HASH_BASE32_LENGTH * 5, 8
 
 const PLC_HASH_ALPHABET: base32::Alphabet = base32::Alphabet::Rfc4648Lower { padding: false };
 
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(try_from = "&str", into = "String")]
 pub struct DidPlc {
     hash_bytes: [u8; PLC_HASH_BYTE_COUNT],
 }
@@ -51,6 +53,18 @@ impl TryFrom<&str> for DidPlc {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         try_parse_formatted(value)
+    }
+}
+
+impl Into<String> for DidPlc {
+    fn into(self) -> String {
+        self.formatted_did()
+    }
+}
+
+impl Into<String> for &DidPlc {
+    fn into(self) -> String {
+        self.formatted_did()
     }
 }
 
@@ -152,5 +166,33 @@ mod tests {
     fn invalid_hash_chars() {
         let plc = "did:plc:c6te24qg5hx54qgegqyl0189";
         assert_matches!(try_parse_formatted(plc), Err(Error::InvalidHash));
+    }
+
+    #[test]
+    fn serde_de_ok() -> Result<(), serde_json::Error> {
+        let plc = "\"did:plc:c6te24qg5hx54qgegqylpqkx\"";
+        serde_json::de::from_str::<DidPlc>(plc)?;
+        Ok(())
+    }
+
+    #[test]
+    fn serde_de_err() {
+        let plc = "\"c6te24qg5hx54qgegqylpqkx\"";
+        let res = serde_json::de::from_str::<DidPlc>(plc);
+        assert_matches!(res, Err(_));
+        assert_matches!(
+            res.unwrap_err().classify(),
+            serde_json::error::Category::Data
+        );
+    }
+
+    #[test]
+    fn serde_ser_ok() {
+        let plc_str = "did:plc:c6te24qg5hx54qgegqylpqkx";
+        let plc: DidPlc = plc_str.try_into().unwrap();
+        assert_eq!(
+            serde_json::ser::to_string(&plc).unwrap(),
+            format!("\"{plc_str}\"")
+        );
     }
 }

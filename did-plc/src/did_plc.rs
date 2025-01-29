@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::fmt::{Debug, Display, Formatter};
 
 use sha2::Digest;
 use thiserror::Error;
@@ -13,8 +13,7 @@ const PLC_HASH_BYTE_COUNT: usize = usize::div_ceil(PLC_HASH_BASE32_LENGTH * 5, 8
 
 const PLC_HASH_ALPHABET: base32::Alphabet = base32::Alphabet::Rfc4648Lower { padding: false };
 
-// TODO custom debug
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct DidPlc {
     hash_bytes: [u8; PLC_HASH_BYTE_COUNT],
 }
@@ -87,8 +86,20 @@ fn try_parse_hash(hash: &str) -> Result<DidPlc, Error> {
     })
 }
 
+impl Debug for DidPlc {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if f.alternate() {
+            f.debug_tuple("DidPlc")
+                .field(&self.formatted_did())
+                .finish()
+        } else {
+            f.write_str(self.formatted_did().as_ref())
+        }
+    }
+}
+
 impl Display for DidPlc {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.formatted_did())
     }
 }

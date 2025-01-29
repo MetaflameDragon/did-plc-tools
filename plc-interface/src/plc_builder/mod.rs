@@ -23,8 +23,6 @@ pub struct PlcBuilderInterface {
     verification_methods: VerificationMethodsInterface,
     services: ServicesInterface,
     prev: Option<PlcOperationRef>,
-
-    plc_json_loader: PlcJsonLoader,
 }
 
 impl PlcBuilderInterface {
@@ -56,7 +54,7 @@ impl PlcBuilderInterface {
     }
 
     fn draw_plc_loader_interface(&mut self, ui: &mut Ui) {
-        let plc_op = match self.plc_json_loader.ui(ui) {
+        let plc_op = match plc_json_loader_ui(ui) {
             None => None,
             Some(Ok(plc_op)) => {
                 info!("Loading plc json: {:?}", plc_op);
@@ -200,45 +198,38 @@ impl PlcBuilderInterface {
     }
 }
 
-#[derive(Default, Clone, Debug)]
-struct PlcJsonLoader {}
+/// Displays UI for a PLC JSON loader
+///
+/// Returns `Some(Result)` when the user attempts to parse a PLC operation.
+/// - `Result::Ok(SignedPlcOperation)` if parsing was successful.
+/// - `Result::Err` with an `anyhow` error if there was an error while parsing.
+fn plc_json_loader_ui(ui: &mut Ui) -> Option<Result<SignedPlcOperation>> {
+    let button = egui::Button::new("Load signed operation from clipboard (JSON) & set CID ref");
+    let btn_resp = button.ui(ui);
 
-impl PlcJsonLoader {
-    /// Displays the UI
-    ///
-    /// Returns `Some(Result)` when the user attempts to parse a PLC operation.
-    /// - `Result::Ok(SignedPlcOperation)` if parsing was successful.
-    /// - `Result::Err` with an `anyhow` error if there was an error while parsing.
-    fn ui(&mut self, ui: &mut Ui) -> Option<Result<SignedPlcOperation>> {
-        let button = egui::Button::new("Load from clipboard (JSON)");
-        let btn_resp = button.ui(ui);
-
-        if btn_resp.clicked() {
-            ui.ctx().send_viewport_cmd(ViewportCommand::RequestPaste);
-            btn_resp.request_focus();
-        }
-
-        if !btn_resp.has_focus() {
-            return None;
-        }
-
-        let clipboard = ui.input(|i| {
-            i.events.iter().find_map(|e| {
-                if let egui::Event::Paste(paste) = e {
-                    Some(paste.to_owned())
-                } else {
-                    None
-                }
-            })
-        })?;
-
-        if clipboard.is_empty() {
-            return Some(Err(anyhow!("Clipboard is empty")));
-        }
-
-        btn_resp.surrender_focus();
-        Some(
-            serde_json::de::from_str(&clipboard).context("Failed to deserialize JSON in clipboard"),
-        )
+    if btn_resp.clicked() {
+        ui.ctx().send_viewport_cmd(ViewportCommand::RequestPaste);
+        btn_resp.request_focus();
     }
+
+    if !btn_resp.has_focus() {
+        return None;
+    }
+
+    let clipboard = ui.input(|i| {
+        i.events.iter().find_map(|e| {
+            if let egui::Event::Paste(paste) = e {
+                Some(paste.to_owned())
+            } else {
+                None
+            }
+        })
+    })?;
+
+    if clipboard.is_empty() {
+        return Some(Err(anyhow!("Clipboard is empty")));
+    }
+
+    btn_resp.surrender_focus();
+    Some(serde_json::de::from_str(&clipboard).context("Failed to deserialize JSON in clipboard"))
 }

@@ -152,7 +152,7 @@ impl PlcBuilderInterface {
                 Ok(plc_op) => {
                     let json = serde_json::ser::to_string_pretty(&plc_op)
                         .unwrap_or("Failed to serialize plc operation".to_string());
-                    info!("{json}");
+                    println!("{json}");
                 }
                 Err(err) => {
                     for err in err.chain().take(3) {
@@ -198,10 +198,10 @@ impl PlcBuilderInterface {
                 }
             };
 
-            info!("Signed PLC operation:\n{result}");
-            info!("Identifier: {}", signed_op.get_did_plc());
+            println!("Signed PLC operation:\n{result}");
+            println!("Identifier: {}", signed_op.get_did_plc());
             if signed_op.prev().is_some() {
-                info!("(Note: this is not a genesis operation! You may need the genesis did:plc instead.)");
+                println!("(Note: this is not a genesis operation! You may need the genesis did:plc instead.)");
             }
         }
     }

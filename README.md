@@ -96,3 +96,28 @@ everything myself._
 
 As stated before, the code is missing a lot of documentation, though you'll at least find some unit tests and some
 example uses in `did-plc/src/main.rs`. The rest of the examples is effectively the whole `plc-interface` crate.
+
+---
+
+# Other stuff
+
+## Issues, PRs, etc.
+
+Since this was and still is a personal project, I don't plan on maintaining the repository, and I'm unlikely to respond
+to issues or accept PRs. My plan is to develop a "proper version 2" of this library and GUI tool, so this repo will
+eventually become outdated anyway (and I'll add a link to the new one). All code is provided as-is, and forking is
+welcome too.
+
+## Use of code generation
+
+For programming, I use full-line code completion (which comes with JetBrains IDEs and runs entirely locally), but I
+refrain from using generative language models of any greater scope. Computational expenses aside, there are ethical
+issues with the way certain models were/are trained, and generating code this way requires spending more time on review
+instead (and is likely to introduce bugs). In addition, using text prompts would pull me out of the coding flow, and I
+much prefer figuring things out on my own, because that's what makes programming fun for me. Due to the sensitive nature
+of these topics, I feel like it's responsible to add this disclaimer - I'm comfortable
+with [the way this machine learning model was trained](https://blog.jetbrains.com/blog/2024/04/04/full-line-code-completion-in-jetbrains-ides-all-you-need-to-know/#under-the-hood),
+and it doesn't take away any part of what makes programming enjoyable for me.
+
+All code in this codebase is effectively written by me, or adapted from internet sources. I just saved a few more
+keystrokes than I would have with only common IDE code completion/generation utilities.

@@ -15,16 +15,37 @@ In short, I'll need to:
 
 I can't make full use of my GUI tool here, but let's at least get familiar with it.
 
+### _Figuring out your identity_
+
+Throughout this whole process, I'll need to use my did:plc identifier multiple times,
+so it's a good idea to do that now.
+There are multiple ways to resolve an `at://` handle, the PDS endpoint is a pretty straightforward way to go about it.
+
+I'll also have to contact my PDS a few times, so let's establish that too. My current PDS is at `bsky.social`
+(that's technically my PDS' _entryway_, but both the entryway and direct PDS url will work here).
+As such, **`bsky.social` will be my base domain** for PDS requests, so all those HTTP requests will **start with
+`https://bsky.social/xrpc/`**.
+_Unless you're self-hosting, your PDS will probably have the same entryway domain too._
+
+To get my did:plc, I'll send **a GET request to
+`https://bsky.social/xrpc/com.atproto.identity.resolveHandle?handle=metaflame.dev`**.
+
+Should you find yourself looking for someone's did:plc without immediate access to a convenient HTTP client,
+I can suggest a site such as [internect.info](https://internect.info) (I love the word
+[_internection_](https://www.pfrazee.com/blog/why-not-p2p#not-quite-p2p-not-quite-federation) ♥).
+
+_If you want to learn more about handle resolution,
+[check out the ATProto docs](https://atproto.com/specs/handle#handle-resolution)._
+
 ## Getting the PLC operation ready
+
+I can get my unsigned PLC operation ready before I'll need to ask my PDS to sign it - so let's do that first. All PLC
+operations (currently) reside in [plc.directory](https://plc.directory), and are publicly accessible to everyone - you
+just need the did:plc identifier.
 
 ### _Fetching the logs..._
 
-I can get my unsigned PLC operation ready before I'll need to ask my PDS to sign it - so let's do that first. All PLC
-operations (currently) reside in [plc.directory](https://plc.directory). To fetch my latest PLC operation, I'll first *
-*get my `did:plc` identifier** - I can do that by sending a GET request to
-`https://bsky.social/xrpc/com.atproto.identity.resolveHandle?handle=metaflame.dev`, or using a tool such
-as [internect.info](https://internect.info) (I love the word [
-_internection_](https://www.pfrazee.com/blog/why-not-p2p#not-quite-p2p-not-quite-federation) ♥). Next, I'll **send a GET
+With my handle resolved to my PLC identifier, I'll **send a GET
 request to `https://plc.directory/did:plc:c6te24qg5hx54qgegqylpqkx/log/last`** (substitute with your own identifier, of
 course).
 
@@ -53,10 +74,9 @@ signed by my PDS.
 
 ### _Where we're going, we do need passwords_
 
-I'll first need to create a session in my HTTP client of choice (I used Insomnia). My current PDS is at `bsky.social` (
-that's technically my PDS' _entryway_, but both the entryway and direct PDS url will work here). To get my access JWT,
-I'll **send an _unauthenticated_ `POST` request to `https://bsky.social/xrpc/com.atproto.server.createSession`** with
-credentials in the body:
+This is where I'll start having to use _authenticated_ requests, so I'll first need to create a session.
+To get my access JWT (my session token), I'll **send an _unauthenticated_ `POST` request to
+`https://bsky.social/xrpc/com.atproto.server.createSession`** with credentials in the body:
 
 ```json
 {
@@ -66,11 +86,14 @@ credentials in the body:
 ```
 
 Asking your PDS to sign a PLC operation for you is a high-privilege action. For that reason, you **MUST USE YOUR MAIN
-PASSWORD**, app passwords won't work here! I recommend using this access JWT _only_ for the following three HTTP
-requests, same as how you wouldn't run every bash command with `sudo`. _Note that this is subject to change as we get
-more granular OAuth scopes, and if app passwords change or get deprecated._
+PASSWORD**, app passwords won't work here! In addition, I recommend using this access JWT _only_ for
+the following three HTTP requests, same as how you wouldn't run every bash command
+with `sudo`.
+_Note that this is subject to change as we get more granular OAuth scopes, and if app passwords change or get deprecated._
 
 From here on, all requests are _authenticated_ with a Bearer token (prefix: `Bearer`, token: value of `accessJwt`).
+
+![Screenshot of the Bearer token tab in Insomnia](insomnia_bearer_example.png)
 
 ### _The op's so nice you must ask twice_
 

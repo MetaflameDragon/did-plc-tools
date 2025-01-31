@@ -156,5 +156,4 @@ recovery [here](https://github.com/did-method-plc/did-method-plc?tab=readme-ov-f
 _[Your complementary Bluesky Badge of Honor should arrive shortly](https://bsky.app/profile/decentralise.goeo.lol)_
 
 And if you want to go further, **why not check out [how to sign a PLC operation on your own?](./self_signing.md)**
-_(WIP)_
 Self-signing was the main reason I started working on this project, after all.

@@ -36,7 +36,7 @@ requests on your own (see practical examples below).
 
 ## Practical examples
 
-I wrote some detailed guides about how I'd go about using my PLC tool, you can follow these steps once you get the
+I wrote some guides detailing how I'd go about using my PLC tool, you can follow these steps once you get the
 visual app running. You'll also need **an HTTP client** _(such as Insomnia)_ to send some GET and POST requests - the
 app is completely offline and makes no HTTP calls of its own! Besides that, I assume basic technical knowledge about
 Bluesky (I mean, since you clicked on this repo, I'd assume you already know that did:plc is some sort of identifier),
@@ -46,7 +46,7 @@ you should be good.
 The guides pretty much became blog posts, but I suppose it makes for a nicer read too:
 
 - [Adding your first rotation key](./guides/add_rot_key.md)
-- [Signing your first PLC operation](./guides/self_signing.md) _(WIP)_
+- [Signing your first PLC operation](./guides/self_signing.md)
 
 ---
 

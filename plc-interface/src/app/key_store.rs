@@ -40,6 +40,7 @@ impl KeyStoreInterface {
         ui.horizontal(|ui| {
             let refresh_button = ui.small_button(crate::ui_helpers::emoji::COUNTERCLOCKWISE_ARROWS);
             if refresh_button.clicked() {
+                self.store.set_dir(&self.key_store_dir_str);
                 self.store.refresh();
             };
             ui.text_edit_singleline(&mut self.key_store_dir_str);
@@ -58,6 +59,8 @@ impl KeyStoreInterface {
                     if ui.button("Add Key").clicked() {
                         self.key_gen_interface.set_modal_open_state(true);
                     }
+
+                    self.store.set_dir(&self.key_store_dir_str);
 
                     let new_key = self
                         .key_gen_interface
@@ -91,16 +94,22 @@ impl KeyStore {
             .find(|key_box| key_box.as_did_key() == *key)
     }
 
-    #[allow(dead_code)]
     pub fn set_dir(&mut self, dir_str: impl Into<PathBuf>) {
         self.key_store_path = dir_str.into();
     }
 
     pub fn refresh(&mut self) {
         let dir_iter = match fs::read_dir(&self.key_store_path) {
-            Ok(iterator) => iterator,
+            Ok(iterator) => {
+                info!(
+                    "Found key store path (at \"{}\")",
+                    self.key_store_path.display()
+                );
+                iterator
+            }
             Err(err) => {
                 error!("Error refreshing keys: {err}");
+                error!("Was looking for: \"{}\"", self.key_store_path.display());
                 return;
             }
         };

@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use anyhow::{anyhow, Context, Result};
 use did_key::DidKey;
 use did_plc::{PlcOperationRef, PlcService, SignedPlcOperation, UnsignedPlcOperation};
+use eframe::Storage;
 use egui::{RichText, Ui, ViewportCommand, Widget};
 use log::{error, info};
 
@@ -24,6 +25,10 @@ pub struct PlcBuilderInterface {
     verification_methods: VerificationMethodsInterface,
     services: ServicesInterface,
     prev: Option<PlcOperationRef>,
+}
+
+impl PlcBuilderInterface {
+    pub(crate) fn save(&self, storage: &mut dyn Storage) {}
 }
 
 impl PlcBuilderInterface {

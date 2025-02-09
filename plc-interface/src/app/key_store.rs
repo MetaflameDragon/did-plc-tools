@@ -36,6 +36,11 @@ impl KeyStoreInterface {
         }
     }
 
+    #[allow(dead_code)]
+    pub fn key_store_dir_str(&self) -> &str {
+        &self.key_store_dir_str
+    }
+
     pub fn ui(&mut self, ui: &mut Ui) {
         ui.horizontal(|ui| {
             let refresh_button = ui.small_button(crate::ui_helpers::emoji::COUNTERCLOCKWISE_ARROWS);

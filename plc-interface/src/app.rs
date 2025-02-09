@@ -23,9 +23,11 @@ impl App {
     }
 }
 
+const STORAGE_KEY_STORE_DIR: &str = "key_store_dir";
+
 fn init_key_store(storage: Option<&dyn Storage>) -> KeyStoreInterface {
     fn get_key_store_dir(storage: Option<&dyn Storage>) -> Option<String> {
-        Some(match storage?.get_string("key_store_dir") {
+        Some(match storage?.get_string(STORAGE_KEY_STORE_DIR) {
             Some(value) => value,
             None => {
                 let mut path = std::env::current_dir().ok()?;
@@ -47,6 +49,15 @@ impl eframe::App for App {
             });
             self.plc_builder.ui(ui, self.keystore.keystore())
         });
+    }
+
+    fn save(&mut self, storage: &mut dyn Storage) {
+        self.plc_builder.save(storage);
+
+        storage.set_string(
+            "key_store_dir",
+            self.keystore.key_store_dir_str().to_owned(),
+        );
     }
 }
 
